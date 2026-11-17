@@ -1,75 +1,38 @@
-# React + TypeScript + Vite
+# Project Insight: Software Effort Monitoring & Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Course:** SWE 4663 – Software Project Management  
+**Group:** Group #4  
+**Instructor:** Prof. Mona Chavoshi    
+**Team Members:** Tanner Giddens, Tonia Gates, Randy Giles, Hermela Gizaw, Ethan Gregg  
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Overview
+Project Insight is a centralized project management and effort-monitoring web application designed to bridge the operational gap between high-level milestones and granular lifecycle resource allocation. 
 
-## React Compiler
+The application enables project managers to maintain dynamic team rosters, record project risks, and define functional and non-functional requirements. Individual contributors can log expended person-hours (daily or weekly) across five key software development lifecycle phases:
+1. Requirements Analysis
+2. Designing
+3. Coding
+4. Testing
+5. Project Management
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The system automatically aggregates these entries to provide real-time visibility into cumulative hours expended per requirement.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Project Status & Repository Purpose
+This repository serves as the central configuration and source control hub for Group #4. 
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+At this stage, the repository is being initialized for version control and documentation tracking ahead of application implementation:
+- **Planning & Documentation:** Requirements, architecture designs, and milestone plans (Quick Plan, Comprehensive Project Plan).
+- **Issue Tracking:** Task assignments, feature planning, and defect logs via GitHub Issues.
+- **Source Code:** Implementation files will be introduced in subsequent project sprints.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
-
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+## Repository Structure
+```text
+.
+├── docs/             # Planning documents, requirements, and user guides
+└── README.md         # Project overview and repository instructions
