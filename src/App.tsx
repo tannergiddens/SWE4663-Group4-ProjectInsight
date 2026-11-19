@@ -130,6 +130,8 @@ function App() {
         target_end_date: newProjectEndDate || undefined,
       });
 
+      console.log('Created project response:', created);
+
       // Refresh project list
       const updatedProjects = await api.getProjects();
       setProjects(updatedProjects);
@@ -398,7 +400,7 @@ function App() {
                   type="submit"
                   className="btn btn-primary"
                   disabled={creatingProject}
-                >
+                  >
                   {creatingProject ? 'Initializing Project...' : 'Create Project'}
                 </button>
               </div>

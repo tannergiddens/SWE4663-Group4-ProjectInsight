@@ -182,5 +182,3 @@ export function seedDatabase(): void {
   console.log("Database initialized cleanly with Group 4 data and authentic project plan records.");
 }
 
-// Run if called directly
-seedDatabase();

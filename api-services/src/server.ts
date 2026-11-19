@@ -1,12 +1,13 @@
 import express from "express";
 import cors from "cors";
-import { initializeDatabase } from "./database/db.js";
 import { seedDatabase } from "./database/seed.js";
 import projectsRouter from "./routes/projects.js";
 import requirementsRouter from "./routes/requirements.js";
 import effortRouter from "./routes/effort.js";
 import risksRouter from "./routes/risks.js";
 import usersRouter from "./routes/users.js";
+import { createClientRoutes } from "./routes/clientRoutes.js";
+import db from "./database/db.js";
 
 const app = express();
 const PORT = 3001;
@@ -16,7 +17,6 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize and seed database
-initializeDatabase();
 seedDatabase();
 
 // Route mounting
@@ -25,6 +25,7 @@ app.use("/api/requirements", requirementsRouter);
 app.use("/api/effort", effortRouter);
 app.use("/api/risks", risksRouter);
 app.use("/api/users", usersRouter);
+app.use('/api', createClientRoutes(db));
 
 // Health check endpoint
 app.get("/api/health", (_req, res) => {
