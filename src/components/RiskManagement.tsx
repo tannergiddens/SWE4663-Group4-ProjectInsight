@@ -110,7 +110,7 @@ export const RiskManagement: React.FC<RiskManagementProps> = ({
                 <th>Impact (1-5)</th>
                 <th>Score</th>
                 <th>Lifecycle Status</th>
-                <th>Risk Owner</th>
+                <th>Risk Lead</th>
                 <th>Mitigation Strategy</th>
                 <th>Actions</th>
               </tr>
@@ -227,7 +227,7 @@ export const RiskManagement: React.FC<RiskManagementProps> = ({
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Assigned Risk Owner</label>
+                  <label>Assigned Risk Lead</label>
                   <select
                     value={ownerId}
                     onChange={(e) => setOwnerId(e.target.value ? Number(e.target.value) : '')}

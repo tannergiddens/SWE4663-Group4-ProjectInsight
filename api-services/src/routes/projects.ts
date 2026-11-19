@@ -43,7 +43,7 @@ router.post("/", (req, res) => {
       return res.status(400).json({ error: "project_name and description are required" });
     }
 
-    const pmName = (owner_name || project_manager_name || "Project Owner").trim();
+    const pmName = (owner_name || project_manager_name || "Project Manager").trim();
     
     // Find or create user for the owner / PM
     let pm = db.prepare("SELECT user_id FROM users WHERE full_name = ? COLLATE NOCASE").get(pmName) as { user_id: number } | undefined;

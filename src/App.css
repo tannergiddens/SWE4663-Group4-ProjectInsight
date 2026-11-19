@@ -499,6 +499,7 @@ body {
 
 .data-table {
   width: 100%;
+  min-width: 620px;
   border-collapse: collapse;
   font-size: 0.9rem;
   text-align: left;
