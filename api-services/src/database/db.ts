@@ -3,8 +3,8 @@ import path from "node:path";
 import fs from "node:fs";
 
 const databaseDirectory = path.resolve(
-  process.cwd(),
-  "data"
+  import.meta.dirname,
+  "../../data"
 );
 
 if (!fs.existsSync(databaseDirectory)) {
@@ -27,8 +27,8 @@ db.pragma("journal_mode = WAL");
 // Initialize the database tables.
 export function initializeDatabase(): void {
   const schemaPath = path.resolve(
-    process.cwd(),
-    "src/database/schema.sql"
+    import.meta.dirname,
+    "schema.sql"
   );
 
   const schema = fs.readFileSync(schemaPath, "utf8");

@@ -49,24 +49,24 @@ CREATE TABLE IF NOT EXISTS project_members (
   role_name TEXT NOT NULL,
   joined_on TEXT NOT NULL,
   left_on TEXT,
-  CHECK (left_on IS NULL OR left_on >= joined_on)
+  CHECK (left_on IS NULL OR left_on >= joined_on),
+  UNIQUE (project_id, user_id)
 );
 
 -- 2. SDLC phases and optional sprints
--- The seven rows below represent six SDLC phases plus client acceptance.
+-- The five rows below represent the SWE 4663 course-required SDLC phases.
 CREATE TABLE IF NOT EXISTS sdlc_phases (
   phase_id INTEGER PRIMARY KEY,
   phase_name TEXT NOT NULL UNIQUE,
   sequence_no INTEGER NOT NULL UNIQUE
 );
 INSERT INTO sdlc_phases (phase_id, phase_name, sequence_no) VALUES
-  (1,'Planning & Feasibility',1),
-  (2,'Requirements Analysis',2),
-  (3,'System Design',3),
-  (4,'Development',4),
-  (5,'Testing & Verification',5),
-  (6,'Deployment & Release',6),
-  (7,'Client Acceptance & Sign-Off',7) ON CONFLICT(phase_id) DO NOTHING;
+  (1, 'Requirements Analysis', 1),
+  (2, 'Designing', 2),
+  (3, 'Coding', 3),
+  (4, 'Testing', 4),
+  (5, 'Project Management', 5)
+  ON CONFLICT(phase_id) DO UPDATE SET phase_name = excluded.phase_name, sequence_no = excluded.sequence_no;
 
 CREATE TABLE IF NOT EXISTS project_phases (
   project_phase_id INTEGER PRIMARY KEY,
@@ -140,9 +140,11 @@ CREATE TABLE IF NOT EXISTS task_assignments (
 -- a duplicate summary of daily rows; choose daily OR weekly logging.
 CREATE TABLE IF NOT EXISTS time_entries (
   entry_id INTEGER PRIMARY KEY,
-  task_id INTEGER NOT NULL REFERENCES tasks(task_id),
+  project_id INTEGER REFERENCES projects(project_id),
+  requirement_id INTEGER REFERENCES requirements(requirement_id),
+  task_id INTEGER REFERENCES tasks(task_id),
   user_id INTEGER NOT NULL REFERENCES users(user_id),
-  phase_id INTEGER REFERENCES sdlc_phases(phase_id),
+  phase_id INTEGER NOT NULL REFERENCES sdlc_phases(phase_id),
   defect_id INTEGER REFERENCES defects(defect_id),
   activity TEXT NOT NULL DEFAULT 'Development',
   period_type TEXT NOT NULL DEFAULT 'daily'
@@ -167,7 +169,8 @@ CREATE TABLE IF NOT EXISTS risks (
   impact INTEGER NOT NULL CHECK (impact BETWEEN 1 AND 5),
   status TEXT NOT NULL DEFAULT 'open',
   owner_id INTEGER REFERENCES users(user_id),
-  mitigation_plan TEXT
+  mitigation_plan TEXT,
+  UNIQUE (project_id, title)
 );
 
 CREATE TABLE IF NOT EXISTS defects (
@@ -231,8 +234,7 @@ CREATE VIEW IF NOT EXISTS v_project_hours AS
 SELECT p.project_id, p.project_name,
        COALESCE(SUM(te.hours), 0) AS accumulated_hours
 FROM projects p
-LEFT JOIN tasks t ON t.project_id = p.project_id
-LEFT JOIN time_entries te ON te.task_id = t.task_id
+LEFT JOIN time_entries te ON te.project_id = p.project_id
 GROUP BY p.project_id, p.project_name;
 
 CREATE VIEW IF NOT EXISTS v_all_projects_hours AS
@@ -240,13 +242,34 @@ SELECT COALESCE(SUM(accumulated_hours), 0) AS accumulated_hours
 FROM v_project_hours;
 
 CREATE VIEW IF NOT EXISTS v_time_details AS
-SELECT te.entry_id, t.project_id, t.requirement_id, te.task_id,
+SELECT te.entry_id, te.project_id, te.requirement_id, te.task_id,
        t.parent_task_id, te.user_id,
-       COALESCE(te.phase_id, t.phase_id) AS phase_id,
+       te.phase_id,
+       p.phase_name,
        t.sprint_id, te.activity, te.period_type, te.period_start,
        te.period_end, te.hours, te.is_rework, te.defect_id
 FROM time_entries te
-JOIN tasks t ON t.task_id = te.task_id;
+LEFT JOIN tasks t ON t.task_id = te.task_id
+LEFT JOIN sdlc_phases p ON p.phase_id = te.phase_id;
+
+-- Aggregated effort per requirement across each of the 5 course SDLC phases
+CREATE VIEW IF NOT EXISTS v_requirement_phase_effort AS
+SELECT 
+  r.project_id,
+  r.requirement_id,
+  r.requirement_code,
+  r.title AS requirement_title,
+  r.requirement_type,
+  COALESCE(SUM(CASE WHEN p.phase_name = 'Requirements Analysis' THEN te.hours ELSE 0 END), 0) AS requirements_analysis_hours,
+  COALESCE(SUM(CASE WHEN p.phase_name = 'Designing' THEN te.hours ELSE 0 END), 0) AS designing_hours,
+  COALESCE(SUM(CASE WHEN p.phase_name = 'Coding' THEN te.hours ELSE 0 END), 0) AS coding_hours,
+  COALESCE(SUM(CASE WHEN p.phase_name = 'Testing' THEN te.hours ELSE 0 END), 0) AS testing_hours,
+  COALESCE(SUM(CASE WHEN p.phase_name = 'Project Management' THEN te.hours ELSE 0 END), 0) AS project_management_hours,
+  COALESCE(SUM(te.hours), 0) AS total_expended_hours
+FROM requirements r
+LEFT JOIN time_entries te ON te.requirement_id = r.requirement_id
+LEFT JOIN sdlc_phases p ON te.phase_id = p.phase_id
+GROUP BY r.project_id, r.requirement_id, r.requirement_code, r.title, r.requirement_type;
 
 -- Five optional performance indexes; primary keys and UNIQUE constraints
 -- already receive their own SQLite indexes automatically.
@@ -254,6 +277,10 @@ CREATE INDEX IF NOT EXISTS idx_requirements_project ON requirements(project_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_requirement ON tasks(requirement_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_parent ON tasks(parent_task_id);
 CREATE INDEX IF NOT EXISTS idx_time_entries_task ON time_entries(task_id);
+CREATE INDEX IF NOT EXISTS idx_time_entries_req ON time_entries(requirement_id);
+CREATE INDEX IF NOT EXISTS idx_time_entries_proj ON time_entries(project_id);
 CREATE INDEX IF NOT EXISTS idx_defects_requirement ON defects(requirement_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_project_members_unique ON project_members(project_id, user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_risks_unique ON risks(project_id, title);
 
 COMMIT;
