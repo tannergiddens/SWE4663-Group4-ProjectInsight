@@ -157,6 +157,7 @@ export const Header: React.FC<HeaderProps> = ({
             {showClientInfo && (
               <div
                 role="presentation"
+                className="client-profile-overlay"
                 onClick={() => setShowClientInfo(false)}
                 style={{
                   position: 'fixed',
@@ -172,6 +173,7 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <div
                   role="dialog"
+                  className="client-profile-modal"
                   aria-modal="true"
                   aria-labelledby="client-profile-title"
                   onClick={e => e.stopPropagation()}

@@ -1032,6 +1032,66 @@ textarea:focus {
   margin-top: 1rem;
 }
 
+.new-project-modal {
+  border: 1px solid #e3e3dd;
+  border-radius: 0.9rem;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(56, 66, 57, 0.18);
+}
+
+.new-project-modal .modal-header {
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid #eef0eb;
+}
+
+.new-project-modal .modal-header h3 {
+  color: #384239;
+}
+
+.new-project-modal .btn-close {
+  color: #858b82;
+}
+
+.new-project-modal .form-group label {
+  color: #626b61;
+  font-size: 0.76rem;
+}
+
+.new-project-modal input[type="text"],
+.new-project-modal input[type="date"],
+.new-project-modal select,
+.new-project-modal textarea {
+  border-color: #e0e1da;
+  border-radius: 0.55rem;
+  background: #fbfaf8;
+  color: #384239;
+}
+
+.new-project-modal input:focus,
+.new-project-modal select:focus,
+.new-project-modal textarea:focus {
+  border-color: #9aaa91;
+  box-shadow: 0 0 0 3px rgba(82, 105, 77, 0.12);
+}
+
+.new-project-modal .btn-primary {
+  background: #52694d;
+}
+
+.new-project-modal .btn-primary:hover {
+  background: #43583f;
+}
+
+.new-project-modal .btn-secondary {
+  border-color: #e0e1da;
+  background: #fff;
+  color: #52694d;
+}
+
+.new-project-modal .btn-secondary:hover {
+  background: #f0f3ed;
+}
+
 .empty-state {
   text-align: center;
   padding: 2.5rem 1rem !important;

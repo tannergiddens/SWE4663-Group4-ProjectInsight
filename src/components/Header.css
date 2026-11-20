@@ -168,6 +168,65 @@
   color: #3c463e;
 }
 
+.app-layout .client-profile-overlay {
+  background: rgba(56, 66, 57, 0.42) !important;
+}
+
+.app-layout .client-profile-modal {
+  border: 1px solid #e3e3dd !important;
+  border-radius: 0.9rem !important;
+  background: #fff !important;
+  color: #384239 !important;
+  box-shadow: 0 18px 50px rgba(56, 66, 57, 0.18) !important;
+}
+
+.app-layout .client-profile-modal h2 {
+  color: #384239 !important;
+}
+
+.app-layout .client-profile-modal p {
+  color: #7e857c !important;
+}
+
+.app-layout .client-profile-modal > div:first-child {
+  border-bottom-color: #eef0eb !important;
+}
+
+.app-layout .client-profile-modal > div:first-child button {
+  background: #f0f1eb !important;
+  color: #626b61 !important;
+}
+
+.app-layout .client-profile-modal section > div:first-child {
+  color: #52694d !important;
+}
+
+.app-layout .client-profile-modal section > div:last-child {
+  border-color: #e3e3dd !important;
+}
+
+.app-layout .client-profile-modal section > div:last-child > div {
+  color: #384239 !important;
+}
+
+.app-layout .client-profile-modal section > div:last-child > div > div:first-child {
+  color: #858b82 !important;
+  border-right-color: #e3e3dd !important;
+}
+
+.app-layout .client-profile-modal section > div:last-child > div > div:last-child {
+  color: #384239 !important;
+}
+
+.app-layout .client-profile-modal > div:last-child {
+  border-top-color: #eef0eb !important;
+}
+
+.app-layout .client-profile-modal > div:last-child button {
+  border-radius: 0.55rem !important;
+  background: #52694d !important;
+}
+
 .app-layout .header-actions .btn-primary {
   background: #52694d;
 }

@@ -1,0 +1,175 @@
+.timesheet-page {
+  gap: 1.35rem;
+  color: #384239;
+}
+
+.timesheet-page .section-header h2 {
+  color: #384239;
+  letter-spacing: -0.035em;
+}
+
+.timesheet-page .section-desc,
+.timesheet-page .hint {
+  color: #7e857c;
+}
+
+.timesheet-page .card {
+  border: 1px solid #e3e3dd;
+  border-radius: 0.9rem;
+  background: #fff;
+  box-shadow: none;
+}
+
+.timesheet-page .card h3 {
+  color: #384239;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.timesheet-page .form-stack {
+  gap: 1.05rem;
+}
+
+.timesheet-page .form-group label {
+  color: #626b61;
+  font-size: 0.76rem;
+}
+
+.timesheet-page input[type="text"],
+.timesheet-page input[type="number"],
+.timesheet-page input[type="date"],
+.timesheet-page select,
+.timesheet-page textarea {
+  border-color: #e0e1da;
+  border-radius: 0.55rem;
+  background: #fbfaf8;
+  color: #384239;
+}
+
+.timesheet-page input:focus,
+.timesheet-page select:focus,
+.timesheet-page textarea:focus {
+  border-color: #9aaa91;
+  box-shadow: 0 0 0 3px rgba(82, 105, 77, 0.12);
+}
+
+.timesheet-page .btn-primary {
+  background: #52694d;
+}
+
+.timesheet-page .btn-primary:hover {
+  background: #43583f;
+}
+
+.timesheet-page .contributor-toggle {
+  gap: 0.45rem;
+}
+
+.timesheet-page .btn-sub {
+  border-color: #e0e1da;
+  border-radius: 0.5rem;
+  background: #fbfaf8;
+  color: #7e857c;
+}
+
+.timesheet-page .btn-sub.active {
+  border-color: #c9d6c3;
+  background: #eaf1e4;
+  color: #52694d;
+}
+
+.timesheet-page .period-toggle {
+  gap: 0.45rem;
+}
+
+.timesheet-page .radio-pill {
+  border-color: #e0e1da;
+  border-radius: 0.55rem;
+  background: #fbfaf8;
+  color: #7e857c;
+}
+
+.timesheet-page .radio-pill.active {
+  border-color: #c9d6c3;
+  background: #eaf1e4;
+  color: #52694d;
+}
+
+.timesheet-page .phases-grid-container {
+  border-color: #e0e1da;
+  border-radius: 0.7rem;
+  background: #f5f6f1;
+}
+
+.timesheet-page .phase-grid-header {
+  color: #52694d;
+}
+
+.timesheet-page .phase-name {
+  color: #7e857c;
+}
+
+.timesheet-page .phase-input-box input {
+  background: #fff;
+  text-align: center;
+}
+
+.timesheet-page .grid-total-row {
+  border-top-color: #dfe4da;
+}
+
+.timesheet-page .grid-total-row strong {
+  color: #52694d;
+}
+
+.timesheet-page .alert-success {
+  border-color: #c9d6c3;
+  background: #eaf1e4;
+  color: #52694d;
+}
+
+.timesheet-page .alert-warning-inline {
+  border-color: #e6d9b7;
+  background: #f4efdf;
+  color: #947a43;
+}
+
+.timesheet-page .recent-logs-card .hint {
+  margin-bottom: 1.1rem;
+}
+
+.timesheet-page .table-responsive {
+  border: 1px solid #e7e8e2;
+  border-radius: 0.65rem;
+}
+
+.timesheet-page .data-table {
+  min-width: 650px;
+}
+
+.timesheet-page .data-table th {
+  background: #f0f1eb;
+  color: #626b61;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.timesheet-page .data-table td {
+  color: #626b61;
+}
+
+.timesheet-page .data-table tr:hover td {
+  background: #fbfaf8;
+}
+
+.timesheet-page .phase-badge,
+.timesheet-page .period-badge {
+  border-color: #dce5d6;
+  background: #eaf1e4;
+  color: #52694d;
+}
+
+.timesheet-page .hours-highlight {
+  color: #52694d;
+}

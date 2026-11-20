@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { Requirement, RequirementType, PriorityLevel } from '../types';
+import './RequirementsView.css';
 
 interface RequirementsViewProps {
   requirements: Requirement[];
@@ -58,7 +59,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
   const nonFunctionalCount = requirements.filter((r) => r.requirement_type === 'non_functional').length;
 
   return (
-    <div className="section-container">
+    <div className="section-container requirements-page">
       <div className="section-header">
         <div>
           <h2>System Requirements Specification</h2>

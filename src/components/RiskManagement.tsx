@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { Risk, Requirement, User } from '../types';
+import './RiskManagement.css';
 
 interface RiskManagementProps {
   risks: Risk[];
@@ -57,13 +58,13 @@ export const RiskManagement: React.FC<RiskManagementProps> = ({
 
   const getRiskScoreClass = (prob: number, imp: number) => {
     const score = prob * imp;
-    if (score >= 15) return 'risk-high';
-    if (score >= 8) return 'risk-medium';
+    if (score >= 7) return 'risk-high';
+    if (score >= 4) return 'risk-medium';
     return 'risk-low';
   };
 
   return (
-    <div className="section-container">
+    <div className="section-container risk-register-page">
       <div className="section-header">
         <div>
           <h2>Enterprise Risk Register</h2>

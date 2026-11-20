@@ -318,7 +318,7 @@ function App() {
       {/* Modal for Creating a New Project Dynamically */}
       {showNewProjectModal && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="modal-content new-project-modal">
             <div className="modal-header">
               <h3>Create New Project</h3>
               <button
