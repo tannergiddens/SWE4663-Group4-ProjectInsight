@@ -1,3 +1,18 @@
+export interface Client {
+  client_id: number;
+  client_name: string;
+  contact_title?: string | null;
+  address_line1?: string | null;
+  address_line2?: string | null;
+  city?: string | null;
+  state_region?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
+  direct_phone?: string | null;
+  mobile_phone?: string | null;
+  email?: string | null;
+}
+
 export interface User {
   user_id: number;
   full_name: string;
