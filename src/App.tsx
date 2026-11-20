@@ -18,6 +18,21 @@ import { ProjectOverview } from './components/ProjectOverview';
 import { RiskManagement } from './components/RiskManagement';
 import './App.css';
 
+interface ClientDetails {
+  client_id: number;
+  client_name: string;
+  contact_title: string | null;
+  address_line1: string;
+  address_line2: string | null;
+  city: string;
+  state_region: string | null;
+  postal_code: string | null;
+  country: string;
+  direct_phone: string;
+  mobile_phone: string | null;
+  email: string | null;
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState<string>('matrix');
   const [loading, setLoading] = useState<boolean>(true);
@@ -36,6 +51,146 @@ function App() {
   const [newProjectMethodology, setNewProjectMethodology] = useState<string>('Agile / Iterative');
   const [newProjectEndDate, setNewProjectEndDate] = useState<string>('');
   const [creatingProject, setCreatingProject] = useState<boolean>(false);
+  const [showNewClientDetails, setShowNewClientDetails] = useState(false);
+
+  const [clientMode, setClientMode] = useState<'existing' | 'new'>(
+  'existing'
+  );
+
+  const [availableClients, setAvailableClients] = useState<
+    { client_id: number; client_name: string }[]
+  >([]);
+
+  const [selectedClientId, setSelectedClientId] = useState('');
+
+  const [selectedClient, setSelectedClient] =
+    useState<ClientDetails | null>(null);
+
+  const [clientsLoading, setClientsLoading] = useState(false);
+
+  const [clientLookupError, setClientLookupError] =
+    useState<string | null>(null);
+
+  const emptyNewClient = {
+    client_name: '',
+    contact_title: '',
+    address_line1: '',
+    address_line2: '',
+    city: '',
+    state_region: '',
+    postal_code: '',
+    country: '',
+    direct_phone: '',
+    mobile_phone: '',
+    email: '',
+  };
+
+  const [newClient, setNewClient] = useState(emptyNewClient);
+
+  type NewClientField = keyof typeof emptyNewClient;
+
+  const updateNewClient = (
+    field: NewClientField,
+    value: string
+  ) => {
+    setNewClient(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };  
+
+  useEffect(() => {
+    if (!showNewProjectModal) return;
+
+    const controller = new AbortController();
+
+    const loadClients = async () => {
+      setClientsLoading(true);
+      setClientLookupError(null);
+
+      try {
+        const response = await fetch('/api/clients', {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error('Unable to load existing clients.');
+        }
+
+        const data: {
+          client_id: number;
+          client_name: string;
+        }[] = await response.json();
+
+        if (!controller.signal.aborted) {
+          setAvailableClients(data);
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setClientLookupError(
+            error instanceof Error
+              ? error.message
+              : 'Unable to load clients.'
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setClientsLoading(false);
+        }
+      }
+    };
+
+    void loadClients();
+
+    return () => controller.abort();
+  }, [showNewProjectModal]);
+
+  useEffect(() => {
+    if (
+      !showNewProjectModal ||
+      clientMode !== 'existing' ||
+      !selectedClientId
+    ) {
+      setSelectedClient(null);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const loadClientDetails = async () => {
+      setSelectedClient(null);
+      setClientLookupError(null);
+
+      try {
+        const response = await fetch(
+          `/api/clients/${selectedClientId}`,
+          { signal: controller.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error('Unable to retrieve client details.');
+        }
+
+        const client: ClientDetails = await response.json();
+
+        if (!controller.signal.aborted) {
+          setSelectedClient(client);
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setClientLookupError(
+            error instanceof Error
+              ? error.message
+              : 'Unable to load client details.'
+          );
+        }
+      }
+    };
+
+    void loadClientDetails();
+
+    return () => controller.abort();
+  }, [showNewProjectModal, clientMode, selectedClientId]);
 
   // Active Project Data
   const [phases, setPhases] = useState<SDLCPhase[]>([]);
@@ -118,37 +273,108 @@ function App() {
   // Project creation handler
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProjectName.trim() || !newProjectDesc.trim()) return;
+
+    if (!newProjectName.trim() || !newProjectDesc.trim()) {
+      return;
+    }
+
+    if (clientMode === 'existing') {
+      if (
+        !selectedClientId ||
+        !selectedClient ||
+        selectedClient.client_id !== Number(selectedClientId)
+      ) {
+        alert('Please select an existing client.');
+        return;
+      }
+    } else {
+      if (
+        !newClient.client_name.trim() ||
+        !newClient.address_line1.trim() ||
+        !newClient.city.trim() ||
+        !newClient.country.trim() ||
+        !newClient.direct_phone.trim()
+      ) {
+        alert('Please complete the required client information.');
+        return;
+      }
+    }
 
     setCreatingProject(true);
+
     try {
+      const clientPayload =
+        clientMode === 'existing'
+          ? {
+              client_id: Number(selectedClientId),
+            }
+          : {
+              client: {
+                ...newClient,
+              },
+            };
+
       const created = await api.createProject({
         project_name: newProjectName.trim(),
         description: newProjectDesc.trim(),
-        owner_name: newProjectOwner.trim() || 'Lead Project Manager',
+        owner_name:
+          newProjectOwner.trim() || 'Lead Project Manager',
         methodology: newProjectMethodology,
         target_end_date: newProjectEndDate || undefined,
+        ...clientPayload,
       });
 
       console.log('Created project response:', created);
 
-      // Refresh project list
-      const updatedProjects = await api.getProjects();
-      setProjects(updatedProjects);
-      setCurrentProjectId(created.project_id);
-      setShowNewProjectModal(false);
-
-      // Reset form
+      // Project creation succeeded.
+      // Reset all form fields.
       setNewProjectName('');
       setNewProjectOwner('');
       setNewProjectDesc('');
+      setNewProjectMethodology('Agile / Iterative');
       setNewProjectEndDate('');
+
+      setClientMode('existing');
+      setSelectedClientId('');
+      setSelectedClient(null);
+      setNewClient({ ...emptyNewClient });
+      setShowNewClientDetails(false);
+      setClientLookupError(null);
+
+      // Close the modal after successful creation.
+      setShowNewProjectModal(false);
+
+      // Select the newly created project.
+      setCurrentProjectId(created.project_id);
+
+      // Refresh the project list separately.
+      try {
+        const updatedProjects = await api.getProjects();
+        setProjects(updatedProjects);
+      } catch (refreshError) {
+        console.error(
+          'Project created but project list refresh failed:',
+          refreshError
+        );
+
+        setError(
+          'Project created successfully, but the project list could not be refreshed.'
+        );
+      }
+
     } catch (err) {
-      alert((err as Error).message || 'Failed to create new project');
+      console.error('Project creation failed:', err);
+
+      alert(
+        (err as Error).message ||
+        'Failed to create new project'
+      );
+
     } finally {
       setCreatingProject(false);
     }
   };
+
 
   // Handlers for Project Updates
   const handleUpdateProject = async (data: Partial<Project> & { owner_name?: string }) => {
@@ -318,7 +544,13 @@ function App() {
       {/* Modal for Creating a New Project Dynamically */}
       {showNewProjectModal && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div
+              className="modal-content"
+              style={{
+                maxHeight: '90vh',
+                overflowY: 'auto',
+              }}
+            >
             <div className="modal-header">
               <h3>Create New Project</h3>
               <button
@@ -387,6 +619,422 @@ function App() {
                   />
                 </div>
               </div>
+
+            {/* Client Information Section */}
+            <div
+              style={{
+                marginTop: 18,
+                border: '1px solid #e2e8f0',
+                borderRadius: 10,
+                overflow: 'hidden',
+              }}
+            >
+              
+              {/* Client Association Heading */}
+              <div
+                style={{
+                  padding: '14px 16px',
+                  background: '#f8fafc',
+                  color: '#1e293b',
+                  borderBottom: '1px solid #e2e8f0',
+                }}
+              >
+                <strong style={{ fontSize: 14 }}>
+                  🏢 Client Association
+                </strong>
+
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: '#64748b',
+                    margin: '6px 0 14px',
+                  }}
+                >
+                  Choose an existing client or register a new one.
+                </p>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 20,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <label>
+                    <input
+                      type="radio"
+                      name="clientMode"
+                      checked={clientMode === 'existing'}
+                      onChange={() => {
+                        setClientMode('existing');
+                        setClientLookupError(null);
+                      }}
+                    />
+                    {' '}Existing Client
+                  </label>
+
+                  <label>
+                    <input
+                      type="radio"
+                      name="clientMode"
+                      checked={clientMode === 'new'}
+                      onChange={() => {
+                        setClientMode('new');
+                        setShowNewClientDetails(true);
+                        setClientLookupError(null);
+                      }}
+                    />
+                    {' '}New Client
+                  </label>
+                </div>
+              </div>
+
+              {/* Existing Client Selection */}
+              {clientMode === 'existing' && (
+                <div
+                  style={{
+                    padding: 18,
+                    background: '#ffffff',
+                    color: '#1e293b',
+                  }}
+                >
+                  <div className="form-group">
+                    <label htmlFor="existing-client">
+                      Select Client *
+                    </label>
+
+                    <select
+                      id="existing-client"
+                      value={selectedClientId}
+                      onChange={e => {
+                        setSelectedClientId(e.target.value);
+                        setSelectedClient(null);
+                      }}
+                      required
+                      disabled={clientsLoading}
+                    >
+                      <option value="">
+                        {clientsLoading
+                          ? 'Loading clients...'
+                          : '-- Select Client --'}
+                      </option>
+
+                      {availableClients.map(client => (
+                        <option
+                          key={client.client_id}
+                          value={client.client_id}
+                        >
+                          {client.client_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedClient && (
+                    <div
+                      style={{
+                        marginTop: 14,
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 8,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div
+                        style={{
+                          padding: '12px 14px',
+                          background: '#f1f5f9',
+                          fontSize: 12,
+                          fontWeight: 700,
+                        }}
+                      >
+                        EXISTING CLIENT PROFILE
+                      </div>
+
+                      {([
+                        ['Client ID', selectedClient.client_id],
+                        ['Client Name', selectedClient.client_name],
+                        ['Contact Title', selectedClient.contact_title],
+                        ['Address Line 1', selectedClient.address_line1],
+                        ['Address Line 2', selectedClient.address_line2],
+                        ['City', selectedClient.city],
+                        ['State / Region', selectedClient.state_region],
+                        ['Postal Code', selectedClient.postal_code],
+                        ['Country', selectedClient.country],
+                        ['Direct Phone', selectedClient.direct_phone],
+                        ['Mobile Phone', selectedClient.mobile_phone],
+                        ['Email', selectedClient.email],
+                      ] as const).map(([label, value], index) => (
+                        <div
+                          key={label}
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns:
+                              'minmax(110px, 38%) minmax(0, 1fr)',
+                            background:
+                              index % 2 === 0
+                                ? '#f8fafc'
+                                : '#ffffff',
+                            borderTop: '1px solid #e2e8f0',
+                            fontSize: 12,
+                          }}
+                        >
+                          <span
+                            style={{
+                              padding: '10px 12px',
+                              fontWeight: 600,
+                              color: '#64748b',
+                            }}
+                          >
+                            {label}
+                          </span>
+
+                          <span
+                            style={{
+                              padding: '10px 12px',
+                              overflowWrap: 'anywhere',
+                            }}
+                          >
+                            {value === null || value === ''
+                              ? '—'
+                              : value}
+                          </span>
+                        </div>
+                      ))}
+
+                      <p
+                        style={{
+                          padding: '0 12px 12px',
+                          fontSize: 11,
+                          color: '#64748b',
+                        }}
+                      >
+                        These details are read-only.
+                        A new project will use this client's existing ID.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {clientLookupError && clientMode === 'existing' && (
+                <p
+                  role="alert"
+                  style={{
+                    padding: '0 18px',
+                    color: '#b91c1c',
+                    fontSize: 12,
+                  }}
+                >
+                  {clientLookupError}
+                </p>
+              )}
+
+              {clientMode === 'new' && showNewClientDetails && (
+                <div
+                  id="new-client-details"
+                  style={{
+                    padding: 18,
+                    background: '#ffffff',
+                    color: '#1e293b',
+                    borderTop: '1px solid #e2e8f0',
+                  }}
+                >
+                  {/* Client Overview */}
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: '#475569',
+                      marginBottom: 12,
+                    }}
+                  >
+                    CLIENT OVERVIEW
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="new-client-name">Client Name *</label>
+                      <input
+                        id="new-client-name"
+                        type="text"
+                        value={newClient.client_name}
+                        onChange={e =>
+                          updateNewClient('client_name', e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="new-contact-title">Contact Title</label>
+                      <input
+                        id="new-contact-title"
+                        type="text"
+                        value={newClient.contact_title}
+                        onChange={e =>
+                          updateNewClient('contact_title', e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Business Address */}
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: '#475569',
+                      margin: '20px 0 12px',
+                    }}
+                  >
+                    BUSINESS ADDRESS
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="new-address1">Address Line 1 *</label>
+                    <input
+                      id="new-address1"
+                      type="text"
+                      value={newClient.address_line1}
+                      onChange={e =>
+                        updateNewClient('address_line1', e.target.value)
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="new-address2">Address Line 2</label>
+                    <input
+                      id="new-address2"
+                      type="text"
+                      value={newClient.address_line2}
+                      onChange={e =>
+                        updateNewClient('address_line2', e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="new-city">City *</label>
+                      <input
+                        id="new-city"
+                        type="text"
+                        value={newClient.city}
+                        onChange={e =>
+                          updateNewClient('city', e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="new-state">State / Region</label>
+                      <input
+                        id="new-state"
+                        type="text"
+                        value={newClient.state_region}
+                        onChange={e =>
+                          updateNewClient('state_region', e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="new-postal">Postal Code</label>
+                      <input
+                        id="new-postal"
+                        type="text"
+                        value={newClient.postal_code}
+                        onChange={e =>
+                          updateNewClient('postal_code', e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="new-country">Country *</label>
+                      <input
+                        id="new-country"
+                        type="text"
+                        value={newClient.country}
+                        onChange={e =>
+                          updateNewClient('country', e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Contact Information */}
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: '#475569',
+                      margin: '20px 0 12px',
+                    }}
+                  >
+                    CONTACT INFORMATION
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="new-direct-phone">Direct Phone *</label>
+                      <input style={{
+                          height: '45px',
+                          minHeight: '45px',
+                          boxSizing: 'border-box',
+                        }}
+                        id="new-direct-phone"
+                        type="tel"
+                        value={newClient.direct_phone}
+                        onChange={e =>
+                          updateNewClient('direct_phone', e.target.value)
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="new-mobile-phone">Mobile Phone</label>
+                      <input style={{
+                          height: '45px',
+                          minHeight: '45px',
+                          boxSizing: 'border-box',
+                        }}
+                        id="new-mobile-phone"
+                        type="tel"
+                        value={newClient.mobile_phone}
+                        onChange={e =>
+                          updateNewClient('mobile_phone', e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="new-client-email">Email</label>
+                    <input style={{
+                        height: '45px',
+                        minHeight: '45px',
+                        boxSizing: 'border-box',
+                      }}
+                      id="new-client-email"
+                      type="email"
+                      value={newClient.email}
+                      onChange={e =>
+                        updateNewClient('email', e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
 
               <div className="modal-actions">
                 <button

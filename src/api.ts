@@ -11,6 +11,20 @@ import type {
 
 const BASE_URL = '/api';
 
+export interface NewClientInput {
+  client_name: string;
+  contact_title?: string | null;
+  address_line1: string;
+  address_line2?: string | null;
+  city: string;
+  state_region?: string | null;
+  postal_code?: string | null;
+  country: string;
+  direct_phone: string;
+  mobile_phone?: string | null;
+  email?: string | null;
+}
+
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({}));
@@ -20,6 +34,25 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export const api = {
+
+  // Clients
+  async getClients(): Promise<{
+    client_id: number;
+    client_name: string;
+  }[]> {
+    return handleResponse(
+      await fetch(`${BASE_URL}/clients`)
+    );
+  },
+
+  async getClientById(clientId: number): Promise<
+    NewClientInput & { client_id: number }
+  > {
+    return handleResponse(
+      await fetch(`${BASE_URL}/clients/${clientId}`)
+    );
+  },
+
   // Projects
   async getProjects(): Promise<Project[]> {
     return handleResponse<Project[]>(await fetch(`${BASE_URL}/projects`));
@@ -36,11 +69,20 @@ export const api = {
     project_manager_name?: string;
     methodology?: string;
     target_end_date?: string;
+
+    // Existing client association
+    client_id?: number;
+
+    // New client registration
+    client?: NewClientInput;
+
   }): Promise<Project> {
     return handleResponse<Project>(
       await fetch(`${BASE_URL}/projects`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(data),
       })
     );

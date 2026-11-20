@@ -47,3 +47,13 @@ export function getClientByProjectId(
     WHERE p.project_id = ?
   `).get(projectId);
 }
+
+export function getAllClients(db: Database.Database) {
+  return db.prepare(`
+    SELECT
+      client_id,
+      client_name
+    FROM clients
+    ORDER BY client_name ASC
+  `).all();
+}

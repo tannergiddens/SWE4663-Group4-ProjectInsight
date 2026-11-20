@@ -25,7 +25,11 @@ router.get("/", (_req, res) => {
   }
 });
 
-// Create a new project dynamically
+
+/**
+ * Create a project for an existing or new client.
+ * All database writes are performed in one transaction.
+ */
 router.post("/", (req, res) => {
   try {
     const {
@@ -37,73 +41,286 @@ router.post("/", (req, res) => {
       status,
       start_date,
       target_end_date,
-    } = req.body;
+      client_id,
+      client,
+    } = req.body ?? {};
 
-    if (!project_name || !description) {
-      return res.status(400).json({ error: "project_name and description are required" });
+    // Validate project information.
+    if (
+      typeof project_name !== "string" ||
+      !project_name.trim() ||
+      typeof description !== "string" ||
+      !description.trim()
+    ) {
+      res.status(400).json({
+        error: "project_name and description are required",
+      });
+      return;
     }
 
-    const pmName = (owner_name || project_manager_name || "Project Manager").trim();
-    
-    // Find or create user for the owner / PM
-    let pm = db.prepare("SELECT user_id FROM users WHERE full_name = ? COLLATE NOCASE").get(pmName) as { user_id: number } | undefined;
-    if (!pm) {
-      const uInfo = db.prepare("INSERT INTO users (full_name, email, active) VALUES (?, ?, 1)").run(
-        pmName,
-        `${pmName.toLowerCase().replace(/\s+/g, ".")}@projectinsight.io`
+    // A request must specify exactly one client mode.
+    const hasNewClient = client != null;
+    const hasExistingClient = client_id != null;
+
+    if (hasNewClient === hasExistingClient) {
+      res.status(400).json({
+        error: "Specify either client_id or client, but not both",
+      });
+      return;
+    }
+
+    // Validate new-client fields before starting the transaction.
+    const requiredClientFields = [
+      "client_name",
+      "address_line1",
+      "city",
+      "country",
+      "direct_phone",
+    ] as const;
+
+    const optionalClientFields = [
+      "contact_title",
+      "address_line2",
+      "state_region",
+      "postal_code",
+      "mobile_phone",
+      "email",
+    ] as const;
+
+    if (hasNewClient) {
+      if (typeof client !== "object" || Array.isArray(client)) {
+        res.status(400).json({
+          error: "Invalid client information",
+        });
+        return;
+      }
+
+      const invalidRequiredField = requiredClientFields.find(
+        field =>
+          typeof client[field] !== "string" ||
+          !client[field].trim()
       );
-      pm = { user_id: Number(uInfo.lastInsertRowid) };
+
+      if (invalidRequiredField) {
+        res.status(400).json({
+          error: `Missing or invalid client field: ${invalidRequiredField}`,
+        });
+        return;
+      }
+
+      const invalidOptionalField = optionalClientFields.find(
+        field =>
+          client[field] != null &&
+          typeof client[field] !== "string"
+      );
+
+      if (invalidOptionalField) {
+        res.status(400).json({
+          error: `Invalid client field: ${invalidOptionalField}`,
+        });
+        return;
+      }
     }
 
-    // Default to client 1 or create generic client
-    let client = db.prepare("SELECT client_id FROM clients LIMIT 1").get() as { client_id: number } | undefined;
-    let clientId = client?.client_id || 1;
+    if (
+      hasExistingClient &&
+      (!Number.isSafeInteger(client_id) || client_id <= 0)
+    ) {
+      res.status(400).json({
+        error: "A valid client_id is required",
+      });
+      return;
+    }
 
-    const info = db.prepare(`
-      INSERT INTO projects (
-        client_id,
-        project_manager_id,
-        project_name,
-        description,
-        methodology,
-        status,
-        start_date,
-        target_end_date
-      ) VALUES (?, ?, ?, ?, COALESCE(?, 'Agile / Iterative'), COALESCE(?, 'active'), COALESCE(?, DATE('now')), ?)
-    `).run(
-      clientId,
-      pm.user_id,
-      project_name.trim(),
-      description.trim(),
-      methodology,
-      status,
-      start_date,
-      target_end_date || null
-    );
+    if (hasExistingClient) {
+      const existing = db.prepare(`
+        SELECT client_id
+        FROM clients
+        WHERE client_id = ?
+      `).get(client_id);
 
-    const projectId = Number(info.lastInsertRowid);
+      if (!existing) {
+        res.status(404).json({
+          error: "Selected client does not exist",
+        });
+        return;
+      }
+    }
 
-    // Auto-add project manager to project roster
-    db.prepare(`
-      INSERT INTO project_members (project_id, user_id, role_name, joined_on)
-      VALUES (?, ?, 'Project Manager', DATE('now'))
-    `).run(projectId, pm.user_id);
+    // Preserve the existing Project Manager naming behavior.
+    const pmName =
+      typeof owner_name === "string" && owner_name.trim()
+        ? owner_name.trim()
+        : typeof project_manager_name === "string" &&
+            project_manager_name.trim()
+          ? project_manager_name.trim()
+          : "Project Manager";
 
-    const created = db.prepare(`
-      SELECT 
-        p.*,
-        u.full_name AS project_manager_name,
-        0 AS total_hours
-      FROM projects p
-      LEFT JOIN users u ON p.project_manager_id = u.user_id
-      WHERE p.project_id = ?
-    `).get(projectId);
+    const optionalText = (value: unknown): string | null =>
+      typeof value === "string" && value.trim()
+        ? value.trim()
+        : null;
+
+    // All inserts must succeed together.
+    const createProjectTransaction = db.transaction(() => {
+      let resolvedClientId: number;
+
+      // ----------------------------------------
+      // 1. Resolve client
+      // ----------------------------------------
+
+      if (hasNewClient) {
+        const result = db.prepare(`
+          INSERT INTO clients (
+            client_name,
+            contact_title,
+            address_line1,
+            address_line2,
+            city,
+            state_region,
+            postal_code,
+            country,
+            direct_phone,
+            mobile_phone,
+            email
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          client.client_name.trim(),
+          optionalText(client.contact_title),
+          client.address_line1.trim(),
+          optionalText(client.address_line2),
+          client.city.trim(),
+          optionalText(client.state_region),
+          optionalText(client.postal_code),
+          client.country.trim(),
+          client.direct_phone.trim(),
+          optionalText(client.mobile_phone),
+          optionalText(client.email)
+        );
+
+        resolvedClientId = Number(result.lastInsertRowid);
+
+      } else {
+        // Reuse the already validated existing client.
+        resolvedClientId = client_id as number;
+      }
+
+      // ----------------------------------------
+      // 2. Find or create Project Manager
+      // ----------------------------------------
+
+      let pm = db.prepare(`
+        SELECT user_id
+        FROM users
+        WHERE full_name = ? COLLATE NOCASE
+      `).get(pmName) as { user_id: number } | undefined;
+
+      if (!pm) {
+        const userInfo = db.prepare(`
+          INSERT INTO users (
+            full_name,
+            email,
+            active
+          )
+          VALUES (?, ?, 1)
+        `).run(
+          pmName,
+          `${pmName.toLowerCase().replace(/\s+/g, ".")}@projectinsight.io`
+        );
+
+        pm = {
+          user_id: Number(userInfo.lastInsertRowid),
+        };
+      }
+
+      // ----------------------------------------
+      // 3. Create project
+      // ----------------------------------------
+
+      const projectInfo = db.prepare(`
+        INSERT INTO projects (
+          client_id,
+          project_manager_id,
+          project_name,
+          description,
+          methodology,
+          status,
+          start_date,
+          target_end_date
+        )
+        VALUES (
+          ?, ?, ?, ?,
+          COALESCE(?, 'Agile / Iterative'),
+          COALESCE(?, 'active'),
+          COALESCE(?, DATE('now')),
+          ?
+        )
+      `).run(
+        resolvedClientId,
+        pm.user_id,
+        project_name.trim(),
+        description.trim(),
+        optionalText(methodology),
+        optionalText(status),
+        optionalText(start_date),
+        optionalText(target_end_date)
+      );
+
+      const projectId = Number(projectInfo.lastInsertRowid);
+
+      // ----------------------------------------
+      // 4. Add Project Manager to roster
+      // ----------------------------------------
+
+      db.prepare(`
+        INSERT INTO project_members (
+          project_id,
+          user_id,
+          role_name,
+          joined_on
+        )
+        VALUES (?, ?, 'Project Manager', DATE('now'))
+      `).run(projectId, pm.user_id);
+
+      // ----------------------------------------
+      // 5. Return the completed project
+      // ----------------------------------------
+
+      const created = db.prepare(`
+        SELECT
+          p.*,
+          u.full_name AS project_manager_name,
+          c.client_name,
+          0 AS total_hours
+        FROM projects p
+        LEFT JOIN users u
+          ON p.project_manager_id = u.user_id
+        LEFT JOIN clients c
+          ON p.client_id = c.client_id
+        WHERE p.project_id = ?
+      `).get(projectId);
+
+      if (!created) {
+        throw new Error("Unable to retrieve created project");
+      }
+
+      return created;
+    });
+
+    const created = createProjectTransaction();
 
     res.status(201).json(created);
+
   } catch (error) {
-    res.status(500).json({ error: (error as Error).message });
+    console.error("Project creation failed:", error);
+
+    res.status(500).json({
+      error: "Unable to create project",
+    });
   }
 });
+
 
 // Get a single project
 router.get("/:id", (req, res) => {
