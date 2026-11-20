@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { Project } from '../types';
+import './Header.css';
 
 interface HeaderProps {
   projects: Project[];
@@ -96,60 +97,63 @@ export const Header: React.FC<HeaderProps> = ({
 
     }, [showClientInfo, currentProject?.project_id]);
 
-  const clientFields = [
-    { key: 'client_id', label: 'Client ID' },
-    { key: 'client_name', label: 'Client Name' },
-    { key: 'contact_title', label: 'Contact Title' },
-    { key: 'address_line1', label: 'Address Line 1' },
-    { key: 'address_line2', label: 'Address Line 2' },
-    { key: 'city', label: 'City' },
-    { key: 'state_region', label: 'State / Region' },
-    { key: 'postal_code', label: 'Postal Code' },
-    { key: 'country', label: 'Country' },
-    { key: 'direct_phone', label: 'Direct Phone' },
-    { key: 'mobile_phone', label: 'Mobile Phone' },
-    { key: 'email', label: 'Email' },
-  ];
-
   const tabs = [
-    { id: 'matrix', label: '📊 Effort Analytics' },
-    { id: 'logger', label: '⏱️ Timesheet Entry' },
-    { id: 'requirements', label: '📋 Requirements' },
-    { id: 'overview', label: '🏢 Project & Team' },
-    { id: 'risks', label: '⚠️ Risk Register' },
+    { id: 'matrix', label: 'Dashboard', icon: '▦' },
+    { id: 'overview', label: 'Project Information', icon: '□' },
+    { id: 'requirements', label: 'Requirements', icon: '▣' },
+    { id: 'logger', label: 'Timesheet Entry', icon: '◷' },
+    { id: 'risks', label: 'Risk Register', icon: '△' },
   ];
 
   return (
     <header className="app-header">
-      <div className="header-top">
-        <div className="header-brand">
+      <aside className="sidebar">
+        <div className="sidebar-brand">
           <div className="logo-badge">PI</div>
-          <div>
-            <h1>Project Insight</h1>
-            <p className="subtitle">Enterprise Resource Intelligence & SDLC Effort Monitoring</p>
-            
-            {/* Client Information Button */}
-            <div style={{ marginTop: 12 }}>
-              <button
-                type="button"
-                onClick={() => setShowClientInfo(true)}
-                aria-haspopup="dialog"
-                style={{
-                  padding: '10px 16px',
-                  background: 'rgba(148, 163, 184, 0.12)',
-                  color: 'inherit',
-                  border: '1px solid rgba(148, 163, 184, 0.35)',
-                  borderRadius: 9,
-                  cursor: 'pointer',
-                  fontSize: 12,
-                  fontWeight: 600,
-                }}
-              >
-                🏢 Client Information ↗
-              </button>
-            </div>
+          <h1>Project Insight</h1>
+        </div>
 
-            {/* Client Profile Modal */}
+        <div className="sidebar-project">
+          <label className="sidebar-label">Active Project</label>
+          <select
+            className="sidebar-project-dropdown"
+            value={currentProject?.project_id || ''}
+            onChange={(e) => onSelectProject(Number(e.target.value))}
+          >
+            {projects.map((p) => (
+              <option key={p.project_id} value={p.project_id}>
+                {p.project_name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <nav className="sidebar-nav" aria-label="Primary navigation">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <span className="nav-icon" aria-hidden="true">{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="sidebar-footer-links">
+          <button type="button"><span className="nav-icon" aria-hidden="true">☼</span> Settings</button>
+          <button type="button"><span className="nav-icon" aria-hidden="true">?</span> Help &amp; getting started</button>
+        </div>
+      </aside>
+
+      <div className="header-main">
+        <div className="header-top">
+          <div className="topbar-title">
+            <h1>{activeTab === 'matrix' ? 'Effort Analytics' : tabs.find((tab) => tab.id === activeTab)?.label || 'Effort Analytics'}</h1>
+            <p className="subtitle">Enterprise Resource Intelligence &amp; SDLC Effort Monitoring</p>
+
             {showClientInfo && (
               <div
                 role="presentation"
@@ -427,28 +431,16 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               </div>
             )}
-
-
-
           </div>
-        </div>
-
         <div className="header-actions">
-          <div className="project-selector-wrapper">
-            <label className="selector-label">Active Project:</label>
-            <select
-              className="project-dropdown"
-              value={currentProject?.project_id || ''}
-              onChange={(e) => onSelectProject(Number(e.target.value))}
-            >
-              {projects.map((p) => (
-                <option key={p.project_id} value={p.project_id}>
-                  {p.project_name} ({p.total_hours || 0} hrs)
-                </option>
-              ))}
-            </select>
-          </div>
-
+          <button
+            type="button"
+            className="btn btn-secondary btn-client"
+            onClick={() => setShowClientInfo(true)}
+            aria-haspopup="dialog"
+          >
+            ↗&nbsp; Client Information
+          </button>
           <button
             type="button"
             className="btn btn-primary btn-sm"
@@ -458,19 +450,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
       </div>
-
-      <nav className="header-nav">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </nav>
+      </div>
     </header>
   );
 };
