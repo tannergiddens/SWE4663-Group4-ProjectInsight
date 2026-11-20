@@ -1,4 +1,5 @@
 import type {
+  Client,
   Project,
   ProjectMember,
   Requirement,
@@ -255,5 +256,10 @@ export const api = {
         method: 'DELETE',
       })
     );
+  },
+
+  // Clients
+  async getProjectClient(projectId: number): Promise<Client> {
+    return handleResponse<Client>(await fetch(`${BASE_URL}/projects/${projectId}/client`));
   },
 };
