@@ -1,7 +1,4 @@
-# ManagePro / Project Insight — Functional Test Cases
-
-> Source: `Term_Project_Test_Cases.xlsm` · Worksheet: `Functional Req. Testing`  
-> Results are transcribed from the workbook; no tests were rerun during conversion.
+# Project Insight — Functional Test Cases
 
 ## Test execution summary
 
@@ -13,12 +10,12 @@
 
 | Test ID | Scenario | Result |
 |---|---|---|
-| [TC1](#tc1) | Users need to Create a new software development project. | **Pass** |
-| [TC2](#tc2) | Enter a requirement for a project. | **Pass** |
-| [TC3](#tc3) | The system needs to be able to allow team members to be associated to a task. | **Fail** |
-| [TC4](#tc4) | Viewing Client Details | **Pass** |
-| [TC5](#tc5) | Creating Client Contact Details | **Pass** |
-| [TC6](#tc6) | Assigning Previous Contact Details | **Pass** |
+| [TC1]| Users need to Create a new software development project. | **Pass** |
+| [TC2]| Enter a requirement for a project. | **Pass** |
+| [TC3]| The system needs to be able to allow team members to be associated to a task. | **Fail** |
+| [TC4]| Viewing Client Details | **Pass** |
+| [TC5]| Creating Client Contact Details | **Pass** |
+| [TC6]| Assigning Previous Contact Details | **Pass** |
 
 ## Test cases
 
@@ -120,5 +117,5 @@ Users are able to assign previously entered client contact details for a client 
 
 ## Notes
 
-- The source worksheet supplies scenario statements, expected results, actual results, and pass/fail outcomes. It does not provide step-by-step procedures, priorities, dates, or testers; these have not been invented.
+- This document supplies scenario statements, expected results, actual results, and pass/fail outcomes. 
 - TC3 is recorded as failed because task/subtask assignment to team members was not implemented at the time of the recorded test.
