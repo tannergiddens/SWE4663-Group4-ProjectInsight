@@ -1638,6 +1638,8 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
                         cursor: 'pointer',
                         border: 'none',
                         font: 'inherit',
+                        textDecoration: 'underline',
+                        textUnderlineOffset: '3px',
                       }}
                     >
                       {req.requirement_code}
