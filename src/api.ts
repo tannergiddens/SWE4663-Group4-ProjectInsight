@@ -10,6 +10,11 @@ import type {
   User,
 } from './types';
 
+import type {
+  TaskRecord,
+  SubtaskRecord,
+} from './components/RequirementsView';
+
 const BASE_URL = '/api';
 
 export interface NewClientInput {
@@ -178,6 +183,127 @@ export const api = {
       })
     );
   },
+
+
+  // Tasks and Sub-tasks
+
+  async getTasks(
+    requirementId: number
+  ): Promise<TaskRecord[]> {
+    return handleResponse<TaskRecord[]>(
+      await fetch(
+        `${BASE_URL}/requirements/${requirementId}/tasks`
+      )
+    );
+  },
+
+  async createTask(
+    requirementId: number,
+    name: string
+  ): Promise<TaskRecord> {
+    return handleResponse<TaskRecord>(
+      await fetch(
+        `${BASE_URL}/requirements/${requirementId}/tasks`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            task_name: name,
+          }),
+        }
+      )
+    );
+  },
+
+  async updateTask(
+    taskId: number,
+    changes: Partial<Pick<
+      TaskRecord,
+      | 'task_name'
+      | 'assigned_to'
+      | 'hours_required'
+      | 'hours_completed'
+    >>
+  ): Promise<void> {
+    await handleResponse<TaskRecord>(
+      await fetch(`${BASE_URL}/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(changes),
+      })
+    );
+  },
+
+  async getSubtasks(
+    taskId: number
+  ): Promise<SubtaskRecord[]> {
+    return handleResponse<SubtaskRecord[]>(
+      await fetch(
+        `${BASE_URL}/tasks/${taskId}/subtasks`
+      )
+    );
+  },
+
+  async createSubtask(
+    taskId: number,
+    name: string
+  ): Promise<SubtaskRecord> {
+    return handleResponse<SubtaskRecord>(
+      await fetch(
+        `${BASE_URL}/tasks/${taskId}/subtasks`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            subtask_name: name,
+          }),
+        }
+      )
+    );
+  },
+
+    async updateSubtask(
+      subtaskId: number,
+      changes: Partial<Pick<
+        SubtaskRecord,
+        | 'subtask_name'
+        | 'assigned_to'
+        | 'hours_required'
+        | 'hours_completed'
+      >>
+    ): Promise<void> {
+      await handleResponse<SubtaskRecord>(
+        await fetch(
+          `${BASE_URL}/subtasks/${subtaskId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(changes),
+          }
+        )
+      );
+    },
+
+    async deleteSubtask(
+      subtaskId: number
+    ): Promise<void> {
+      await handleResponse<{ message: string }>(
+        await fetch(
+          `${BASE_URL}/subtasks/${subtaskId}`,
+          {
+            method: 'DELETE',
+          }
+        )
+      );
+    },
 
   // Effort Logging & Reports
   async logEffort(data: {

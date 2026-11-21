@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import path from "node:path";
 import fs from "node:fs";
+import { runDatabaseMigrations } from "./databaseMigrations.js";
 
 const databaseDirectory = path.resolve(
   import.meta.dirname,
@@ -36,6 +37,8 @@ export function initializeDatabase(): void {
   db.exec(schema);
 
   console.log("ManagePro database initialized.");
+
+  runDatabaseMigrations(db);
 }
 
 export default db;

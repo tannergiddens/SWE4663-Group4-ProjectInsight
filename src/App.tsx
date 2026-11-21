@@ -14,6 +14,13 @@ import { Header } from './components/Header';
 import { EffortMatrix } from './components/EffortMatrix';
 import { EffortLogger } from './components/EffortLogger';
 import { RequirementsView } from './components/RequirementsView';
+
+import type {
+  TaskRecord,
+  SubtaskRecord,
+  TeamMemberOption,
+} from './components/RequirementsView';
+
 import { ProjectOverview } from './components/ProjectOverview';
 import { RiskManagement } from './components/RiskManagement';
 import './App.css';
@@ -418,6 +425,10 @@ function App() {
     setMatrixData(updatedMatrix);
   };
 
+
+
+
+
   // Effort Logging handler
   const handleLogEffort = async (data: {
     requirement_id: number;
@@ -461,6 +472,20 @@ function App() {
     await api.deleteRisk(id);
     setRisks((prev) => prev.filter((r) => r.risk_id !== id));
   };
+
+  const taskTeamMembers: TeamMemberOption[] = members
+  .filter(member => member.left_on == null)
+  .map(member => {
+    const user = users.find(
+      u => u.user_id === member.user_id
+    );
+
+    return {
+      member_id: member.user_id,
+      display_name:
+        user?.full_name ?? `User ${member.user_id}`,
+    };
+  });
 
   return (
     <div className="app-layout">
@@ -513,6 +538,7 @@ function App() {
                 requirements={requirements}
                 onAddRequirement={handleAddRequirement}
                 onDeleteRequirement={handleDeleteRequirement}
+                teamMembers={taskTeamMembers}
               />
             )}
 

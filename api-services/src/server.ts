@@ -3,6 +3,7 @@ import cors from "cors";
 import { seedDatabase } from "./database/seed.js";
 import projectsRouter from "./routes/projects.js";
 import requirementsRouter from "./routes/requirements.js";
+import tasksRouter from "./routes/tasksRoutes.js";
 import effortRouter from "./routes/effort.js";
 import risksRouter from "./routes/risks.js";
 import usersRouter from "./routes/users.js";
@@ -22,10 +23,12 @@ seedDatabase();
 // Route mounting
 app.use("/api/projects", projectsRouter);
 app.use("/api/requirements", requirementsRouter);
+app.use("/api", tasksRouter);
 app.use("/api/effort", effortRouter);
 app.use("/api/risks", risksRouter);
 app.use("/api/users", usersRouter);
 app.use('/api', createClientRoutes(db));
+
 
 // Health check endpoint
 app.get("/api/health", (_req, res) => {

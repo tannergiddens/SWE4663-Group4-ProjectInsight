@@ -120,9 +120,12 @@ CREATE TABLE IF NOT EXISTS tasks (
   description TEXT,
   status TEXT NOT NULL DEFAULT 'todo',
   allocated_hours REAL NOT NULL DEFAULT 0 CHECK (allocated_hours >= 0),
+  hours_completed REAL NOT NULL DEFAULT 0
+    CHECK (hours_completed >= 0),
   remaining_hours REAL CHECK (remaining_hours >= 0),
   due_date TEXT,
   completed_at TEXT,
+  deleted_at TEXT,
   FOREIGN KEY (requirement_id, project_id)
     REFERENCES requirements(requirement_id, project_id),
   CHECK (parent_task_id IS NULL OR parent_task_id <> task_id)
@@ -271,6 +274,7 @@ LEFT JOIN time_entries te ON te.requirement_id = r.requirement_id
 LEFT JOIN sdlc_phases p ON te.phase_id = p.phase_id
 GROUP BY r.project_id, r.requirement_id, r.requirement_code, r.title, r.requirement_type;
 
+
 -- Five optional performance indexes; primary keys and UNIQUE constraints
 -- already receive their own SQLite indexes automatically.
 CREATE INDEX IF NOT EXISTS idx_requirements_project ON requirements(project_id);
@@ -282,5 +286,8 @@ CREATE INDEX IF NOT EXISTS idx_time_entries_proj ON time_entries(project_id);
 CREATE INDEX IF NOT EXISTS idx_defects_requirement ON defects(requirement_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_project_members_unique ON project_members(project_id, user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_risks_unique ON risks(project_id, title);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_one_subtask_per_task
+ON tasks(parent_task_id)
+WHERE parent_task_id IS NOT NULL;
 
 COMMIT;
