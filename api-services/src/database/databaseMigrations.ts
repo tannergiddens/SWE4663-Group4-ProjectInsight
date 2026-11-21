@@ -61,6 +61,25 @@ export function runDatabaseMigrations(
         VALUES (1)
       `).run();
     }
+    // Migration 2: Allow replacement of deleted sub-tasks.
+    // Enforce one ACTIVE sub-task per parent task.
+    if (!versions.has(2)) {
+      db.exec(`
+        DROP INDEX IF EXISTS idx_one_subtask_per_task;
+
+        CREATE UNIQUE INDEX IF NOT EXISTS
+          idx_one_active_subtask_per_task
+        ON tasks(parent_task_id)
+        WHERE parent_task_id IS NOT NULL
+          AND deleted_at IS NULL;
+      `);
+
+      db.prepare(`
+        INSERT INTO schema_migrations (version)
+        VALUES (2)
+      `).run();
+    }
+
   });
 
   migrate();

@@ -34,6 +34,65 @@ interface RequirementsViewProps {
   teamMembers: TeamMemberOption[];
 }
 
+
+interface ValidationModalProps {
+  message: string | null;
+  onClose: () => void;
+}
+
+const ValidationModal: React.FC<ValidationModalProps> = ({
+  message,
+  onClose,
+}) => {
+  if (message === null) {
+    return null;
+  }
+
+  return (
+    <div
+      className="modal-overlay"
+      role="presentation"
+    >
+      <div
+        className="modal-content"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="validation-modal-title"
+        aria-describedby="validation-modal-message"
+      >
+        <div className="modal-header">
+          <h3 id="validation-modal-title">
+            ManagePro Notification
+          </h3>
+        </div>
+
+        <div
+          id="validation-modal-message"
+          style={{
+            padding: '20px 0',
+            lineHeight: 1.6,
+            whiteSpace: 'pre-line',
+          }}
+        >
+          {message}
+        </div>
+
+        <div className="modal-actions">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={onClose}
+            autoFocus
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 export const RequirementsView: React.FC<RequirementsViewProps> = ({
   requirements,
   onAddRequirement,
@@ -86,6 +145,9 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
   const [deletingSubtaskId, setDeletingSubtaskId] =
   useState<number | null>(null);
 
+  const [subtaskToDelete, setSubtaskToDelete] =
+  useState<SubtaskRecord | null>(null);
+
   // Task records loaded from SQLite
   const [tasks, setTasks] = useState<TaskRecord[]>([]);
 
@@ -127,6 +189,13 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
   const [priority, setPriority] = useState<PriorityLevel>('medium');
   const [estimatedHours, setEstimatedHours] = useState<number>(10);
   const [loading, setLoading] = useState(false);
+  // Reusable validation and error modal
+  const [validationMessage, setValidationMessage] =
+    useState<string | null>(null);
+
+  const showValidationMessage = (message: string) => {
+    setValidationMessage(message);
+  };
 
     useEffect(() => {
       if (!selectedRequirement) {
@@ -251,7 +320,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           !Number.isFinite(newValue) ||
           newValue < 0
         ) {
-          alert('Please enter a valid number of hours.');
+          showValidationMessage('Please enter a valid number of hours.');
           restoreValue();
           return;
         }
@@ -277,7 +346,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
             newTotal >
             Number(selectedRequirement.estimated_hours) + 0.000001
           ) {
-            alert(
+            showValidationMessage(
               `Total task hours cannot exceed ` +
               `${selectedRequirement.estimated_hours} hours.\n\n` +
               `Requested total: ${newTotal} hours.`
@@ -288,7 +357,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           }
 
           if (newValue < task.hours_completed) {
-            alert(
+            showValidationMessage(
               'Hours Required cannot be less than Hours Completed.'
             );
 
@@ -299,7 +368,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
 
         if (field === 'hours_completed') {
           if (newValue > task.hours_required) {
-            alert(
+            showValidationMessage(
               `Hours Completed cannot exceed ` +
               `${task.hours_required} hours required.`
             );
@@ -337,7 +406,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           }));
 
         } catch (error) {
-          alert(
+          showValidationMessage(
             error instanceof Error
               ? error.message
               : 'Unable to save task hours.'
@@ -387,7 +456,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           !Number.isFinite(newValue) ||
           newValue < 0
         ) {
-          alert('Please enter a valid number of hours.');
+          showValidationMessage('Please enter a valid number of hours.');
           restoreValue();
           return;
         }
@@ -404,7 +473,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
             newValue >
             Number(selectedTask.hours_required) + 0.000001
           ) {
-            alert(
+            showValidationMessage(
               'Sub-task Hours Required cannot exceed ' +
               `${selectedTask.hours_required} hours ` +
               'allocated to the parent task.'
@@ -415,7 +484,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           }
 
           if (newValue < subtask.hours_completed) {
-            alert(
+            showValidationMessage(
               'Hours Required cannot be less than ' +
               'Hours Completed.'
             );
@@ -427,7 +496,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
 
         if (field === 'hours_completed') {
           if (newValue > subtask.hours_required) {
-            alert(
+            showValidationMessage(
               'Hours Completed cannot exceed ' +
               `${subtask.hours_required} hours required.`
             );
@@ -464,7 +533,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           }));
 
         } catch (error) {
-          alert(
+          showValidationMessage(
             error instanceof Error
               ? error.message
               : 'Unable to save sub-task hours.'
@@ -485,17 +554,6 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           savingSubtaskAssignmentId !== null ||
           savingSubtaskHoursId !== null
         ) {
-          return;
-        }
-
-        const confirmed = window.confirm(
-          `Delete sub-task "${subtask.subtask_name}"?\n\n` +
-          'This will remove the sub-task from the active grid. ' +
-          'Its database record will be retained, and another ' +
-          'sub-task cannot be created for this parent task.'
-        );
-
-        if (!confirmed) {
           return;
         }
 
@@ -520,12 +578,23 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
             return updated;
           });
 
-          // IMPORTANT:
-          // Do not reset selectedTask.subtask_created.
-          // The permanent sub-task restriction remains in effect.
+          // Allow another sub-task to be created after deletion.
+          setSelectedTask(previous =>
+            previous?.task_id === subtask.task_id
+              ? { ...previous, subtask_created: false }
+              : previous
+          );
+
+          setTasks(previous =>
+            previous.map(task =>
+              task.task_id === subtask.task_id
+                ? { ...task, subtask_created: false }
+                : task
+            )
+          );
 
         } catch (error) {
-          alert(
+          showValidationMessage(
             error instanceof Error
               ? error.message
               : 'Unable to delete sub-task.'
@@ -562,7 +631,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           );
 
         } catch (error) {
-          alert(
+          showValidationMessage(
             error instanceof Error
               ? error.message
               : 'Unable to save sub-task assignment.'
@@ -597,7 +666,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           );
 
         } catch (error) {
-          alert(
+          showValidationMessage(
             error instanceof Error
               ? error.message
               : 'Unable to save task assignment.'
@@ -640,7 +709,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
 
         if (selectedTask.subtask_created || subtasks.length > 0) {
           setSubtaskCreateError(
-            'This task already has a permanent sub-task record.'
+            'This task already has an active sub-task.'
           );
           return;
         }
@@ -944,8 +1013,8 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
                   <tr>
                     <td colSpan={5} className="empty-state">
                       {selectedTask.subtask_created
-                        ? 'No active sub-task. A permanent sub-task record already exists.'
-                        : 'No sub-task has been created for this task.'}
+                        ? 'No active sub-task is currently displayed.'
+                        : 'No active sub-task exists. You may create one.'}
                     </td>
                   </tr>
                 ) : (
@@ -1085,7 +1154,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
                                 savingSubtaskHoursId !== null
                               }
                               onClick={() => {
-                                void handleDeleteSubtask(subtask);
+                                  setSubtaskToDelete(subtask);  
                               }}
                               title="Delete sub-task"
                             >
@@ -1104,6 +1173,71 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           </div>
         </div>
 
+        {subtaskToDelete && (
+          <div className="modal-overlay">
+            <div
+              className="modal-content"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="delete-subtask-title"
+              aria-describedby="delete-subtask-message"
+            >
+              <div className="modal-header">
+                <h3 id="delete-subtask-title">
+                  Delete Sub-task
+                </h3>
+              </div>
+
+              <div
+                id="delete-subtask-message"
+                style={{
+                  padding: '20px 0',
+                  lineHeight: 1.6,
+                }}
+              >
+                <p>
+                  Are you sure you want to delete
+                  <strong> {subtaskToDelete.subtask_name}</strong>?
+                </p>
+
+                <p style={{ marginTop: '12px' }}>
+                  This will remove the sub-task from the active
+                  grid. Its historical database record will
+                  be retained, and you may create a replacement
+                  sub-task.
+                </p>
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setSubtaskToDelete(null)}
+                  autoFocus
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    const subtask = subtaskToDelete;
+                    setSubtaskToDelete(null);
+                    void handleDeleteSubtask(subtask);
+                  }}
+                >
+                  Delete Sub-task
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <ValidationModal
+          message={validationMessage}
+          onClose={() => setValidationMessage(null)}
+        />
       </div>
     );
   }
@@ -1409,7 +1543,10 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
             </table>
           </div>
         </div>
-
+        <ValidationModal
+          message={validationMessage}
+          onClose={() => setValidationMessage(null)}
+        />
       </div>
     );
   }
@@ -1656,6 +1793,10 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           </div>
         </div>
       )}
+      <ValidationModal
+        message={validationMessage}
+        onClose={() => setValidationMessage(null)}
+      />
     </div>
   );
 };

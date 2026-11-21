@@ -14,7 +14,9 @@ type AssignmentRow = { user_id: number } | undefined;
 const getTask = (id: number) => db.prepare("SELECT * FROM tasks WHERE task_id = ?").get(id) as TaskRow | undefined;
 const getRequirement = (id: number) => db.prepare("SELECT requirement_id, project_id, estimated_hours FROM requirements WHERE requirement_id = ?").get(id) as RequirementRow | undefined;
 const getAssignee = (id: number) => (db.prepare("SELECT user_id FROM task_assignments WHERE task_id = ? AND unassigned_at IS NULL ORDER BY assignment_id DESC LIMIT 1").get(id) as AssignmentRow)?.user_id ?? null;
-const hasChild = (id: number) => !!db.prepare("SELECT 1 FROM tasks WHERE parent_task_id = ? LIMIT 1").get(id);
+const hasChild = (id: number) => !!db.prepare(
+  "SELECT 1 FROM tasks WHERE parent_task_id = ? AND deleted_at IS NULL LIMIT 1"
+).get(id);
 const numberId = (value: string) => { const id = Number(value); if (!Number.isSafeInteger(id) || id <= 0) throw new Error("Invalid record ID."); return id; };
 const validHours = (value: unknown, label: string) => {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) throw new Error(`${label} must be a finite, non-negative number.`);
@@ -110,7 +112,9 @@ router.get('/tasks/:id/subtasks', (req, res) => {
   try {
     const parent = getTask(numberId(req.params.id));
     if (!parent || parent.parent_task_id !== null) return res.status(404).json({error:'Main task not found'});
-    const subtasks = db.prepare('SELECT * FROM tasks WHERE parent_task_id = ? ORDER BY task_id').all(parent.task_id) as TaskRow[];
+    const subtasks = db.prepare(
+      'SELECT * FROM tasks WHERE parent_task_id = ? AND deleted_at IS NULL ORDER BY task_id'
+    ).all(parent.task_id) as TaskRow[];
     return res.json(subtasks.map(subtaskDto));
   } catch (e) { return errorResponse(res, e); }
 });

@@ -2,20 +2,24 @@
 
 ## Test execution summary
 
-- **Total cases:** 6
-- **Passed:** 5
-- **Failed:** 1
+- **Total cases:** 9
+- **Passed:** 9
+- **Failed:** 0
 
 ## Test case index
 
 | Test ID | Scenario | Result |
 |---|---|---|
-| [TC1]| Users need to Create a new software development project. | **Pass** |
-| [TC2]| Enter a requirement for a project. | **Pass** |
-| [TC3]| The system needs to be able to allow team members to be associated to a task. | **Fail** |
-| [TC4]| Viewing Client Details | **Pass** |
-| [TC5]| Creating Client Contact Details | **Pass** |
-| [TC6]| Assigning Previous Contact Details | **Pass** |
+| [TC1]| Users need to Create a new software development project | **Pass** |
+| [TC2]| Enter a requirement for a project | **Pass** |
+| [TC3]| The system needs to be able to allow users to assign tasks to the requirement | **Pass** |
+| [TC4]| The system needs to be able to allow team members to be associated to a task | **Pass** |
+| [TC5]| Adding a sub-task to a task | **Pass** |
+| [TC6]| Deleting a sub-task | **Pass** |
+| [TC7]| Viewing Client Details | **Pass** |
+| [TC8]| Creating Client Contact Details | **Pass** |
+| [TC9]| Assigning Previous Contact Details | **Pass** |
+
 
 ## Test cases
 
@@ -53,21 +57,70 @@ The system is able to create and attach both funcational and non-functional requ
 
 ### TC3
 
+**Scenario:** The system needs to be able to allow users to assign tasks to the requirement.
+
+**Expected result**
+
+User should be able to assign a task to the requirement.
+
+**Actual result**
+
+Users are able to assign tasks to the requirement.
+
+**Status:** Pass
+
+---
+
+
+### TC4
+
 **Scenario:** The system needs to be able to allow team members to be associated to a task.
 
 **Expected result**
 
-User should be able to assign team members to tasks or sub tasks.
+User should be able to assign team members to tasks and sub tasks.
 
 **Actual result**
 
-Functionality does not exist.
+Users are able to assign team members to tasks.
 
-**Status:** Fail
+**Status:** Pass
 
 ---
 
-### TC4
+### TC5
+
+**Scenario:** Adding a sub-task to a task
+
+**Expected result**
+
+Users should be able to add one sub-task to a task.
+
+**Actual result**
+
+Users are able to add exactly one sub-task to a task.
+
+**Status:** Pass
+
+---
+
+### TC6
+
+**Scenario:** Deleting a sub-task
+
+**Expected result**
+
+Users need to be able to delete a sub-task.
+
+**Actual result**
+
+Users are able to delete a sub-task.
+
+**Status:** Pass
+
+---
+
+### TC7
 
 **Scenario:** Viewing Client Details
 
@@ -83,7 +136,7 @@ Users are able to view client contact details from when viewing a selected proje
 
 ---
 
-### TC5
+### TC8
 
 **Scenario:** Creating Client Contact Details
 
@@ -99,7 +152,7 @@ Users are able to create new client detail when the create a new project.
 
 ---
 
-### TC6
+### TC9
 
 **Scenario:** Assigning Previous Contact Details
 
@@ -118,4 +171,4 @@ Users are able to assign previously entered client contact details for a client 
 ## Notes
 
 - This document supplies scenario statements, expected results, actual results, and pass/fail outcomes. 
-- TC3 is recorded as failed because task/subtask assignment to team members was not implemented at the time of the recorded test.
+- All nine functional test cases are currently recorded as passing.
