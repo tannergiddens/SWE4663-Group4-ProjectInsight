@@ -34,6 +34,19 @@ router.post("/project/:projectId", (req, res) => {
       return res.status(400).json({ error: "title and description are required" });
     }
 
+    
+  if (
+  (probability != null &&
+    (!Number.isInteger(probability) || probability < 1 || probability > 5)) ||
+  (impact != null &&
+    (!Number.isInteger(impact) || impact < 1 || impact > 5))
+  ) {
+  return res.status(400).json({
+    error: "Probability and impact must be whole numbers between 1 and 5"
+  });
+  }
+
+
     const info = db.prepare(`
       INSERT INTO risks (
         project_id,
@@ -75,6 +88,17 @@ router.post("/project/:projectId", (req, res) => {
 router.put("/:id", (req, res) => {
   try {
     const { title, description, probability, impact, status, owner_id, mitigation_plan } = req.body;
+    
+  if (
+  (probability != null &&
+    (!Number.isInteger(probability) || probability < 1 || probability > 5)) ||
+  (impact != null &&
+    (!Number.isInteger(impact) || impact < 1 || impact > 5))
+  ) {
+  return res.status(400).json({
+    error: "Probability and impact must be whole numbers between 1 and 5"
+  });
+  }
 
     db.prepare(`
       UPDATE risks
