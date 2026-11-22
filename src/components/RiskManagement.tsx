@@ -141,7 +141,7 @@ export const RiskManagement: React.FC<RiskManagementProps> = ({
                     <select
                       className={`status-select status-${risk.status}`}
                       value={risk.status}
-                      onChange={(e) => onUpdateRisk(risk.risk_id, { status: e.target.value as any })}
+                      onChange={(e) => onUpdateRisk(risk.risk_id, { status: e.target.value as Risk['status'] })}
                     >
                       <option value="open">Open</option>
                       <option value="in_progress">In Progress</option>

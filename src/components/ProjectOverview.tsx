@@ -14,7 +14,6 @@ interface ProjectOverviewProps {
 export const ProjectOverview: React.FC<ProjectOverviewProps> = ({
   project,
   members,
-  users: _users,
   onAddMember,
   onRemoveMember,
   onUpdateProject,
@@ -24,7 +23,7 @@ export const ProjectOverview: React.FC<ProjectOverviewProps> = ({
   const [description, setDescription] = useState('');
   const [pmName, setPmName] = useState('');
   const [methodology, setMethodology] = useState('Agile / Iterative');
-  const [status, setStatus] = useState('active');
+  const [status, setStatus] = useState<Project['status']>('active');
   const [targetEndDate, setTargetEndDate] = useState('');
 
   const [newMemberName, setNewMemberName] = useState('');
@@ -32,14 +31,16 @@ export const ProjectOverview: React.FC<ProjectOverviewProps> = ({
   const [memberLoading, setMemberLoading] = useState(false);
 
   useEffect(() => {
-    if (project) {
+    if (!project) return;
+
+    queueMicrotask(() => {
       setProjectName(project.project_name);
       setDescription(project.description);
       setPmName(project.project_manager_name || '');
       setMethodology(project.methodology || 'Agile / Iterative');
       setStatus(project.status || 'active');
       setTargetEndDate(project.target_end_date || '');
-    }
+    });
   }, [project]);
 
   const handleSaveProject = async (e: React.FormEvent) => {
@@ -49,7 +50,7 @@ export const ProjectOverview: React.FC<ProjectOverviewProps> = ({
       description: description.trim(),
       owner_name: pmName.trim(),
       methodology,
-      status: status as any,
+      status,
       target_end_date: targetEndDate || undefined,
     });
     setIsEditing(false);
@@ -145,7 +146,7 @@ export const ProjectOverview: React.FC<ProjectOverviewProps> = ({
                     <label>Lifecycle Status</label>
                     <select
                       value={status}
-                      onChange={(e) => setStatus(e.target.value as any)}
+                      onChange={(e) => setStatus(e.target.value as Project['status'])}
                     >
                       <option value="planned">Planned</option>
                       <option value="active">Active</option>

@@ -156,7 +156,7 @@ router.patch('/subtasks/:id', (req, res) => {
 });
 router.delete('/subtasks/:id', (req, res) => {
   try {
-    const done = db.transaction(() => {
+    db.transaction(() => {
       const child = getTask(numberId(req.params.id));
       if (!child || child.parent_task_id === null) throw new Error('Sub-task not found');
       db.prepare('UPDATE tasks SET deleted_at = COALESCE(deleted_at, CURRENT_TIMESTAMP) WHERE task_id = ?').run(child.task_id);

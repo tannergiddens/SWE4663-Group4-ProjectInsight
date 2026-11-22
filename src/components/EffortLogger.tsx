@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { Requirement, SDLCPhase, User, TimeEntry } from '../types';
 import './EffortLogger.css';
 
@@ -57,11 +57,11 @@ export const EffortLogger: React.FC<EffortLoggerProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (requirements.length > 0 && !requirements.some((r) => r.requirement_id === reqId)) {
-      setReqId(requirements[0].requirement_id);
-    }
-  }, [requirements, reqId]);
+  const effectiveReqId = requirements.some(
+    (requirement) => requirement.requirement_id === reqId
+  )
+    ? reqId
+    : requirements[0]?.requirement_id || 1;
 
   const handlePhaseHourChange = (phaseId: number, val: number) => {
     setPhaseHours((prev) => ({
@@ -74,7 +74,7 @@ export const EffortLogger: React.FC<EffortLoggerProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reqId) return;
+    if (!effectiveReqId) return;
 
     setSubmitting(true);
     setSuccessMsg(null);
@@ -90,7 +90,7 @@ export const EffortLogger: React.FC<EffortLoggerProps> = ({
         }
 
         await onLogEffort({
-          requirement_id: Number(reqId),
+          requirement_id: effectiveReqId,
           user_id: targetUserId,
           contributor_name: contributorName,
           phase_hours: phaseHours,
@@ -110,7 +110,7 @@ export const EffortLogger: React.FC<EffortLoggerProps> = ({
         }
 
         await onLogEffort({
-          requirement_id: Number(reqId),
+          requirement_id: effectiveReqId,
           user_id: targetUserId,
           contributor_name: contributorName,
           phase_id: Number(singlePhaseId),
@@ -156,7 +156,7 @@ export const EffortLogger: React.FC<EffortLoggerProps> = ({
                 </div>
               ) : (
                 <select
-                  value={reqId}
+                  value={effectiveReqId}
                   onChange={(e) => setReqId(Number(e.target.value))}
                   required
                 >

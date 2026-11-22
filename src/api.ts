@@ -320,7 +320,7 @@ export const api = {
     period_end?: string;
     hours?: number;
     notes?: string;
-  }): Promise<any> {
+  }): Promise<TimeEntry | { message: string; count: number }> {
     return handleResponse(
       await fetch(`${BASE_URL}/effort/log`, {
         method: 'POST',
