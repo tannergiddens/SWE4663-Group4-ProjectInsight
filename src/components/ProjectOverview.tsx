@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Project, ProjectMember, User } from '../types';
+import './ProjectOverview.css';
 
 interface ProjectOverviewProps {
   project: Project | null;
@@ -71,7 +72,7 @@ export const ProjectOverview: React.FC<ProjectOverviewProps> = ({
   };
 
   return (
-    <div className="section-container">
+    <div className="section-container project-overview-page">
       <div className="section-header">
         <div>
           <h2>Project Overview & Team Directory</h2>

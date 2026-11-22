@@ -1,0 +1,190 @@
+.project-overview-page {
+  gap: 1.35rem;
+  color: #384239;
+}
+
+.project-overview-page .section-header h2 {
+  color: #384239;
+  letter-spacing: -0.035em;
+}
+
+.project-overview-page .section-desc,
+.project-overview-page .hint {
+  color: #7e857c;
+}
+
+.project-overview-page .overview-layout {
+  gap: 1rem;
+}
+
+.project-overview-page .card {
+  border: 1px solid #e3e3dd;
+  border-radius: 0.9rem;
+  background: #fff;
+  box-shadow: none;
+}
+
+.project-overview-page .card h3 {
+  margin-bottom: 0.7rem;
+  color: #384239;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.project-overview-page .form-stack {
+  gap: 1.05rem;
+}
+
+.project-overview-page .form-group label {
+  color: #626b61;
+  font-size: 0.76rem;
+}
+
+.project-overview-page input[type="text"],
+.project-overview-page input[type="date"],
+.project-overview-page select,
+.project-overview-page textarea {
+  border-color: #e0e1da;
+  border-radius: 0.55rem;
+  background: #fbfaf8;
+  color: #384239;
+  box-shadow: none;
+}
+
+.project-overview-page input:focus,
+.project-overview-page select:focus,
+.project-overview-page textarea:focus {
+  border-color: #9aaa91;
+  box-shadow: 0 0 0 3px rgba(82, 105, 77, 0.12);
+}
+
+.project-overview-page .btn-primary {
+  background: #52694d;
+}
+
+.project-overview-page .btn-primary:hover {
+  background: #43583f;
+}
+
+.project-overview-page .btn-secondary {
+  border-color: #e0e1da;
+  background: #fff;
+  color: #52694d;
+}
+
+.project-overview-page .btn-secondary:hover {
+  background: #f0f3ed;
+}
+
+.project-overview-page .details-view {
+  gap: 0;
+}
+
+.project-overview-page .detail-item {
+  min-height: 3rem;
+  padding: 0.85rem 0;
+  border-bottom-color: #eef0eb;
+}
+
+.project-overview-page .detail-item .label {
+  color: #858b82;
+  font-size: 0.77rem;
+}
+
+.project-overview-page .detail-item .value {
+  color: #384239;
+  font-size: 0.84rem;
+  text-align: right;
+}
+
+.project-overview-page .detail-item.full-width {
+  gap: 0.45rem;
+  padding-top: 1rem;
+}
+
+.project-overview-page .detail-item.full-width .value {
+  width: 100%;
+  color: #626b61;
+  text-align: left;
+}
+
+.project-overview-page .badge-pm {
+  background: #eaf1e4;
+  color: #52694d;
+}
+
+.project-overview-page .status-pill.status-active {
+  background: #eaf1e4;
+  color: #52694d;
+}
+
+.project-overview-page .status-pill.status-planned,
+.project-overview-page .status-pill.status-completed {
+  background: #f0ebf5;
+  color: #806b91;
+}
+
+.project-overview-page .status-pill.status-on_hold {
+  background: #f4efdf;
+  color: #947a43;
+}
+
+.project-overview-page .roster-card .hint {
+  line-height: 1.5;
+}
+
+.project-overview-page .roster-add-form {
+  margin-top: 1.1rem;
+  gap: 0.55rem;
+}
+
+.project-overview-page .roster-add-form input {
+  min-width: 0;
+}
+
+.project-overview-page .table-responsive {
+  border: 1px solid #e7e8e2;
+  border-radius: 0.65rem;
+}
+
+.project-overview-page .data-table {
+  min-width: 650px;
+}
+
+.project-overview-page .data-table th {
+  background: #f0f1eb;
+  color: #626b61;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.project-overview-page .data-table td {
+  color: #626b61;
+}
+
+.project-overview-page .data-table tr:hover td {
+  background: #fbfaf8;
+}
+
+.project-overview-page .role-tag {
+  border-color: #dce5d6;
+  background: #eaf1e4;
+  color: #52694d;
+}
+
+.project-overview-page .btn-link-danger {
+  color: #9b625a;
+}
+
+@media (max-width: 680px) {
+  .project-overview-page .detail-item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .project-overview-page .detail-item .value {
+    text-align: left;
+  }
+}

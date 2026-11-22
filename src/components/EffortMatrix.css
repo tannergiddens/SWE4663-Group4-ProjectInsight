@@ -1,0 +1,198 @@
+.effort-dashboard {
+  gap: 1.35rem;
+  color: #384239;
+}
+
+.analytics-header {
+  align-items: flex-end;
+  padding: 0.5rem 0 0.25rem;
+}
+
+.analytics-eyebrow {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #52694d;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.analytics-header h2 {
+  font-size: 1.85rem;
+  letter-spacing: -0.045em;
+  line-height: 1.15;
+}
+
+.analytics-header .section-desc {
+  max-width: 720px;
+  color: #7e857c;
+  line-height: 1.35;
+}
+
+.effort-dashboard .header-button-group {
+  gap: 0.6rem;
+}
+
+.effort-dashboard .header-button-group .btn {
+  min-height: 2.5rem;
+  border-radius: 0.65rem;
+}
+
+.effort-dashboard .summary-cards-row {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.effort-dashboard .summary-card {
+  min-height: 7.25rem;
+  border: 0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.1rem;
+  box-shadow: none;
+}
+
+.effort-dashboard .summary-card.total {
+  background: #52694d;
+  color: #fff;
+}
+
+.effort-dashboard .summary-card.total .card-label,
+.effort-dashboard .summary-card.total .card-value,
+.effort-dashboard .summary-card.total .card-sub {
+  color: #fff;
+}
+
+.effort-dashboard .summary-card.p1 { background: #eaf1e4; }
+.effort-dashboard .summary-card.p2 { background: #f0ebf5; }
+.effort-dashboard .summary-card.p3 { background: #f3e7dd; }
+.effort-dashboard .summary-card.p4 { background: #e7f0ed; }
+.effort-dashboard .summary-card.p5 { background: #f4efdf; }
+
+.effort-dashboard .card-value {
+  margin: 0.35rem 0 0.2rem;
+  font-size: 1.8rem;
+  letter-spacing: -0.04em;
+}
+
+.effort-dashboard .card-label {
+  min-height: 2.1em;
+  line-height: 1.35;
+  font-size: 0.68rem;
+}
+
+.analytics-filter-bar {
+  min-height: 2.35rem;
+  padding: 0.2rem 0;
+}
+
+.filter-summary {
+  color: #7e857c;
+  font-size: 0.8rem;
+}
+
+.filter-summary strong {
+  color: #0f172a;
+}
+
+.effort-dashboard .btn-group {
+  flex: 1;
+  max-width: 610px;
+  border: 0;
+  border-radius: 0.6rem;
+  background: #efeee9;
+}
+
+.effort-dashboard .btn-filter {
+  flex: 1;
+  padding: 0.55rem 1rem;
+  border-right: 0;
+  color: #7e857c;
+  font-size: 0.75rem;
+}
+
+.effort-dashboard .btn-filter.active {
+  border-radius: 0.55rem;
+  background: #fff;
+  color: #52694d;
+  box-shadow: 0 1px 4px rgba(54, 65, 53, 0.08);
+}
+
+.effort-dashboard .matrix-card {
+  padding: 0;
+  overflow: hidden;
+  border-color: #e3e3dd;
+  border-radius: 0.9rem;
+  box-shadow: none;
+}
+
+.effort-dashboard .matrix-card h3,
+.effort-dashboard .matrix-card .hint {
+  margin-left: 1.4rem;
+  margin-right: 1.4rem;
+}
+
+.effort-dashboard .matrix-card h3 {
+  margin-top: 1.35rem;
+  font-size: 1.1rem;
+}
+
+.effort-dashboard .matrix-card .hint {
+  margin-bottom: 1.2rem;
+}
+
+.effort-dashboard .matrix-table th {
+  background: #f0f1eb;
+  color: #475569;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.effort-dashboard .matrix-table td {
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+  color: #39433b;
+}
+
+.effort-dashboard .matrix-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.effort-dashboard .matrix-table .cell-total {
+  background: #eef3e9;
+  color: #52694d;
+}
+
+.effort-dashboard .matrix-table .grand-total {
+  background: #dce5d6 !important;
+  color: #52694d !important;
+}
+
+@media (max-width: 1180px) {
+  .effort-dashboard .summary-cards-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .analytics-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .effort-dashboard .summary-cards-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analytics-filter-bar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .effort-dashboard .summary-cards-row {
+    grid-template-columns: 1fr;
+  }
+}

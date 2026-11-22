@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Requirement, SDLCPhase, User, TimeEntry } from '../types';
+import './EffortLogger.css';
 
 interface EffortLoggerProps {
   requirements: Requirement[];
@@ -131,7 +132,7 @@ export const EffortLogger: React.FC<EffortLoggerProps> = ({
   };
 
   return (
-    <div className="section-container">
+    <div className="section-container timesheet-page">
       <div className="section-header">
         <div>
           <h2>Timesheet & Effort Logging</h2>
