@@ -286,9 +286,5 @@ CREATE INDEX IF NOT EXISTS idx_time_entries_proj ON time_entries(project_id);
 CREATE INDEX IF NOT EXISTS idx_defects_requirement ON defects(requirement_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_project_members_unique ON project_members(project_id, user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_risks_unique ON risks(project_id, title);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_one_active_subtask_per_task
-ON tasks(parent_task_id)
-WHERE parent_task_id IS NOT NULL
-AND deleted_at IS NULL;
 
 COMMIT;

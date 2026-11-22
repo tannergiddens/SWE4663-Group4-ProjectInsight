@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { EffortMatrixData, RequirementType } from '../types';
+import './EffortMatrix.css';
 
 interface EffortMatrixProps {
   matrixData: EffortMatrixData | null;
@@ -80,9 +81,10 @@ export const EffortMatrix: React.FC<EffortMatrixProps> = ({ matrixData, loading,
   };
 
   return (
-    <div className="section-container">
-      <div className="section-header">
+    <div className="section-container effort-dashboard">
+      <div className="section-header analytics-header">
         <div>
+          <span className="analytics-eyebrow">PROJECT OVERVIEW</span>
           <h2>Effort Allocation & Lifecycle Matrix</h2>
           <p className="section-desc">
             Real-time aggregation of expended person-hours categorized by requirement and software development lifecycle phase.
@@ -162,7 +164,7 @@ export const EffortMatrix: React.FC<EffortMatrixProps> = ({ matrixData, loading,
         </div>
       </div>
 
-      <div className="filter-bar">
+      <div className="filter-bar analytics-filter-bar">
         <div className="btn-group">
           <button
             type="button"
@@ -186,6 +188,9 @@ export const EffortMatrix: React.FC<EffortMatrixProps> = ({ matrixData, loading,
             Non-Functional Only ({rawReqs.filter((r) => r.requirement_type === 'non_functional').length})
           </button>
         </div>
+        <span className="filter-summary">
+          Showing <strong>{filteredReqs.length}</strong> of {rawReqs.length} requirements
+        </span>
       </div>
 
       <div className="card matrix-card">

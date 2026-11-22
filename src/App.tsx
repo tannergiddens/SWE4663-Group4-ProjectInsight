@@ -16,8 +16,6 @@ import { EffortLogger } from './components/EffortLogger';
 import { RequirementsView } from './components/RequirementsView';
 
 import type {
-  TaskRecord,
-  SubtaskRecord,
   TeamMemberOption,
 } from './components/RequirementsView';
 
@@ -571,12 +569,12 @@ function App() {
       {showNewProjectModal && (
         <div className="modal-overlay">
           <div
-              className="modal-content"
-              style={{
-                maxHeight: '90vh',
-                overflowY: 'auto',
-              }}
-            >
+            className="modal-content new-project-modal"
+            style={{
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
+          >
             <div className="modal-header">
               <h3>Create New Project</h3>
               <button

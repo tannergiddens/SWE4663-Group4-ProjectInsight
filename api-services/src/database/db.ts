@@ -27,10 +27,17 @@ db.pragma("journal_mode = WAL");
 
 // Initialize the database tables.
 export function initializeDatabase(): void {
-  const schemaPath = path.resolve(
+  let schemaPath = path.resolve(
     import.meta.dirname,
     "schema.sql"
   );
+
+  if (!fs.existsSync(schemaPath)) {
+    schemaPath = path.resolve(
+      import.meta.dirname,
+      "../../src/database/schema.sql"
+    );
+  }
 
   const schema = fs.readFileSync(schemaPath, "utf8");
 

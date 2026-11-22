@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Requirement, RequirementType, PriorityLevel } from '../types';
 import { api } from '../api';
+import './RequirementsView.css';
 
 export interface TaskRecord {
   task_id: number;
@@ -1552,7 +1553,7 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
   }
 
   return (
-    <div className="section-container">
+    <div className="section-container requirements-page">
       <div className="section-header">
         <div>
           <h2>System Requirements Specification</h2>
