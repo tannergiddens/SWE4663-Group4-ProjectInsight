@@ -23,16 +23,21 @@ export const ClientProfileModal: React.FC<ClientProfileModalProps> = ({
     }
 
     if (!projectId) {
-      setClientInfo(null);
-      setClientError('No project selected.');
-      setClientLoading(false);
+      queueMicrotask(() => {
+        setClientError('No project selected.');
+        setClientLoading(false);
+      });
       return;
     }
 
     let isMounted = true;
-    setClientLoading(true);
-    setClientError(null);
-    setClientInfo(null);
+    queueMicrotask(() => {
+      if (isMounted) {
+        setClientLoading(true);
+        setClientError(null);
+        setClientInfo(null);
+      }
+    });
 
     api
       .getProjectClient(projectId)

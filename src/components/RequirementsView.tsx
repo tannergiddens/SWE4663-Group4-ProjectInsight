@@ -200,8 +200,10 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
 
     useEffect(() => {
       if (!selectedRequirement) {
-        setTasks([]);
-        setTasksError(null);
+        queueMicrotask(() => {
+          setTasks([]);
+          setTasksError(null);
+        });
         return;
       }
 
@@ -235,19 +237,23 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
         }
       };
 
-      void loadRequirementTasks();
+      queueMicrotask(() => {
+        void loadRequirementTasks();
+      });
 
       return () => {
         cancelled = true;
       };
-    }, [selectedRequirement?.requirement_id]);
+    }, [selectedRequirement]);
 
       // Load the selected task's sub-task records
       useEffect(() => {
         if (!selectedTask) {
-          setSubtasks([]);
-          setSubtasksError(null);
-          setShowAddSubtask(false);
+          queueMicrotask(() => {
+            setSubtasks([]);
+            setSubtasksError(null);
+            setShowAddSubtask(false);
+          });
           return;
         }
 
@@ -284,12 +290,14 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
           }
         };
 
-        void loadSubtasks();
+        queueMicrotask(() => {
+          void loadSubtasks();
+        });
 
         return () => {
           cancelled = true;
         };
-      }, [selectedTask?.task_id]);
+      }, [selectedTask]);
 
       const handleSaveTaskHours = async (
         task: TaskRecord,
@@ -718,16 +726,12 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
         setCreatingSubtask(true);
         setSubtaskCreateError(null);
 
-        let createdSuccessfully = false;
-
         try {
           // Create the permanent record in SQLite.
           await api.createSubtask(
             selectedTask.task_id,
             name
           );
-
-          createdSuccessfully = true;
 
           // Prevent another creation in this session.
           setSelectedTask(previous =>
@@ -760,19 +764,17 @@ export const RequirementsView: React.FC<RequirementsViewProps> = ({
         }
 
         // Refresh the saved records separately.
-        if (createdSuccessfully) {
-          try {
-            const updated = await api.getSubtasks(
-              selectedTask.task_id
-            );
+        try {
+          const updated = await api.getSubtasks(
+            selectedTask.task_id
+          );
 
-            setSubtasks(updated);
-            setSubtasksError(null);
-          } catch (error) {
-            setSubtasksError(
-              'Sub-task was created, but the list could not be refreshed.'
-            );
-          }
+          setSubtasks(updated);
+          setSubtasksError(null);
+        } catch {
+          setSubtasksError(
+            'Sub-task was created, but the list could not be refreshed.'
+          );
         }
       };
 

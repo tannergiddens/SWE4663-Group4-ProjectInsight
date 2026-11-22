@@ -156,7 +156,6 @@ function App() {
       clientMode !== 'existing' ||
       !selectedClientId
     ) {
-      setSelectedClient(null);
       return;
     }
 
@@ -235,7 +234,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    loadInitial();
+    queueMicrotask(() => {
+      void loadInitial();
+    });
   }, [loadInitial]);
 
   // 2. Load Active Project details whenever currentProjectId changes
@@ -271,7 +272,9 @@ function App() {
 
   useEffect(() => {
     if (currentProjectId) {
-      loadProjectDetails(currentProjectId);
+      queueMicrotask(() => {
+        void loadProjectDetails(currentProjectId);
+      });
     }
   }, [currentProjectId, loadProjectDetails]);
 
@@ -754,7 +757,9 @@ function App() {
                     </select>
                   </div>
 
-                  {selectedClient && (
+                  {selectedClient &&
+                    clientMode === 'existing' &&
+                    selectedClient.client_id === Number(selectedClientId) && (
                     <div
                       style={{
                         marginTop: 14,

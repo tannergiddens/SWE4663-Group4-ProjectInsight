@@ -3,6 +3,39 @@ import db from "../database/db.js";
 
 const router = Router();
 
+interface RequirementProjectRow {
+  project_id: number;
+}
+
+interface EffortMatrixRow {
+  requirements_analysis_hours: number;
+  designing_hours: number;
+  coding_hours: number;
+  testing_hours: number;
+  project_management_hours: number;
+  total_expended_hours: number;
+}
+
+interface EffortTotals {
+  requirements_analysis_hours: number;
+  designing_hours: number;
+  coding_hours: number;
+  testing_hours: number;
+  project_management_hours: number;
+  total_expended_hours: number;
+}
+
+interface TotalHoursRow {
+  total_hours: number;
+}
+
+interface RequirementsCountRow {
+  total_count: number;
+  functional_count: number;
+  non_functional_count: number;
+  total_estimated_hours: number;
+}
+
 // Get the 5 official course SDLC phases
 router.get("/phases", (_req, res) => {
   try {
@@ -64,7 +97,7 @@ router.post("/log", (req, res) => {
     // Retrieve project_id from requirement if not supplied
     let projId = project_id;
     if (!projId) {
-      const reqRecord = db.prepare("SELECT project_id FROM requirements WHERE requirement_id = ?").get(requirement_id) as any;
+      const reqRecord = db.prepare("SELECT project_id FROM requirements WHERE requirement_id = ?").get(requirement_id) as RequirementProjectRow | undefined;
       projId = reqRecord?.project_id || 1;
     }
 
@@ -85,7 +118,7 @@ router.post("/log", (req, res) => {
 
     // Case 1: Multi-phase breakdown submitted (e.g. { "1": 4, "2": 3, "3": 8 })
     if (phase_hours && typeof phase_hours === "object") {
-      const createdEntries: any[] = [];
+      const createdEntries: number[] = [];
       for (const [pId, hrs] of Object.entries(phase_hours)) {
         const numericHours = Number(hrs);
         if (numericHours > 0) {
@@ -167,7 +200,7 @@ router.get("/entries", (req, res) => {
       JOIN requirements r ON r.requirement_id = te.requirement_id
       WHERE 1=1
     `;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (project_id) {
       sql += " AND te.project_id = ?";
@@ -203,11 +236,11 @@ router.get("/matrix/:projectId", (req, res) => {
       FROM v_requirement_phase_effort
       WHERE project_id = ?
       ORDER BY requirement_type ASC, requirement_code ASC
-    `).all(req.params.projectId);
+    `).all(req.params.projectId) as EffortMatrixRow[];
 
     // Compute column totals for each phase across the entire project
     const totals = matrix.reduce(
-      (acc: any, row: any) => {
+      (acc: EffortTotals, row: EffortMatrixRow) => {
         acc.requirements_analysis_hours += row.requirements_analysis_hours;
         acc.designing_hours += row.designing_hours;
         acc.coding_hours += row.coding_hours;
@@ -223,7 +256,7 @@ router.get("/matrix/:projectId", (req, res) => {
         testing_hours: 0,
         project_management_hours: 0,
         total_expended_hours: 0,
-      }
+      } satisfies EffortTotals
     );
 
     res.json({
@@ -255,7 +288,7 @@ router.get("/summary/:projectId", (req, res) => {
       SELECT COALESCE(SUM(hours), 0) AS total_hours
       FROM time_entries
       WHERE project_id = ?
-    `).get(req.params.projectId) as any;
+    `).get(req.params.projectId) as TotalHoursRow | undefined;
 
     const requirementsCount = db.prepare(`
       SELECT 
@@ -265,7 +298,7 @@ router.get("/summary/:projectId", (req, res) => {
         COALESCE(SUM(estimated_hours), 0) AS total_estimated_hours
       FROM requirements
       WHERE project_id = ?
-    `).get(req.params.projectId) as any;
+    `).get(req.params.projectId) as RequirementsCountRow | undefined;
 
     res.json({
       phases: phaseSummary,

@@ -20,7 +20,7 @@ router.get("/project/:projectId", (req, res) => {
       LEFT JOIN v_requirement_phase_effort pe ON pe.requirement_id = r.requirement_id
       WHERE r.project_id = ?
     `;
-    const params: any[] = [req.params.projectId];
+    const params: unknown[] = [req.params.projectId];
 
     if (type && (type === "functional" || type === "non_functional")) {
       sql += " AND r.requirement_type = ?";
