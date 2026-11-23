@@ -9,6 +9,7 @@ interface ProjectOverviewProps {
   onAddMember: (data: { full_name: string; role_name: string; email?: string }) => Promise<void>;
   onRemoveMember: (memberId: number) => Promise<void>;
   onUpdateProject: (data: Partial<Project> & { owner_name?: string }) => Promise<void>;
+  onDeleteProject?: (projectId: number) => Promise<void>;
 }
 
 export const ProjectOverview: React.FC<ProjectOverviewProps> = ({
@@ -17,8 +18,10 @@ export const ProjectOverview: React.FC<ProjectOverviewProps> = ({
   onAddMember,
   onRemoveMember,
   onUpdateProject,
+  onDeleteProject,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [description, setDescription] = useState('');
   const [pmName, setPmName] = useState('');
@@ -42,6 +45,23 @@ export const ProjectOverview: React.FC<ProjectOverviewProps> = ({
       setTargetEndDate(project.target_end_date || '');
     });
   }, [project]);
+
+  const handleDeleteProjectClick = async () => {
+    if (!project) return;
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${project.project_name}"?\n\nThis will permanently remove the project and all associated requirements, tasks, risks, and timesheet records.`
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      if (onDeleteProject) {
+        await onDeleteProject(project.project_id);
+      }
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handleSaveProject = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,13 +101,26 @@ export const ProjectOverview: React.FC<ProjectOverviewProps> = ({
             Manage project parameters, leadership assignments, and dynamic team member allocations.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={() => setIsEditing(!isEditing)}
-        >
-          {isEditing ? 'Cancel Editing' : '✏️ Edit Project Details'}
-        </button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            {isEditing ? 'Cancel Editing' : '✏️ Edit Project Details'}
+          </button>
+          {onDeleteProject && project && (
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={handleDeleteProjectClick}
+              disabled={deleting}
+              title="Permanently delete this project"
+            >
+              {deleting ? 'Deleting...' : '🗑️ Delete Project'}
+            </button>
+          )}
+        </div>
       </div>
 
       {project && (

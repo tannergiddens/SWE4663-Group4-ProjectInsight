@@ -394,6 +394,28 @@ function App() {
     setProjects(updatedProjects);
   };
 
+  const handleDeleteProject = async (projectId: number) => {
+    try {
+      await api.deleteProject(projectId);
+      const updatedProjects = await api.getProjects();
+      setProjects(updatedProjects);
+      if (updatedProjects.length > 0) {
+        const nextProject = updatedProjects.find((p) => p.project_id !== projectId) || updatedProjects[0];
+        setCurrentProjectId(nextProject.project_id);
+        void loadProjectDetails(nextProject.project_id);
+      } else {
+        setCurrentProject(null);
+        setMembers([]);
+        setRequirements([]);
+        setMatrixData(null);
+        setRecentEntries([]);
+        setRisks([]);
+      }
+    } catch (err) {
+      alert((err as Error).message || 'Failed to delete project');
+    }
+  };
+
   const handleAddMember = async (data: { full_name: string; role_name: string; email?: string }) => {
     await api.addProjectMember(currentProjectId, data);
     const updatedMembers = await api.getProjectMembers(currentProjectId);
@@ -495,6 +517,7 @@ function App() {
         currentProject={currentProject}
         onSelectProject={(id) => setCurrentProjectId(id)}
         onOpenNewProjectModal={() => setShowNewProjectModal(true)}
+        onDeleteProject={handleDeleteProject}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
@@ -551,6 +574,7 @@ function App() {
                 onAddMember={handleAddMember}
                 onRemoveMember={handleRemoveMember}
                 onUpdateProject={handleUpdateProject}
+                onDeleteProject={handleDeleteProject}
               />
             )}
 

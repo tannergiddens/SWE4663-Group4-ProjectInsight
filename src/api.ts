@@ -104,6 +104,14 @@ export const api = {
     );
   },
 
+  async deleteProject(id: number): Promise<{ message: string; project_id?: number }> {
+    return handleResponse<{ message: string; project_id?: number }>(
+      await fetch(`${BASE_URL}/projects/${id}`, {
+        method: 'DELETE',
+      })
+    );
+  },
+
   // Team Members
   async getProjectMembers(projectId: number): Promise<ProjectMember[]> {
     return handleResponse<ProjectMember[]>(await fetch(`${BASE_URL}/projects/${projectId}/members`));

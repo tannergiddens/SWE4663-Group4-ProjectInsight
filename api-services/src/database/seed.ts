@@ -22,7 +22,7 @@ export function seedDatabase(): void {
     [1, "Tanner Giddens", "tgiddens@students.kennesaw.edu"],
     [2, "Randy Giles", "rgiles@students.kennesaw.edu"],
     [3, "Hermela Gizaw", "hgizaw@students.kennesaw.edu"],
-    [4, "Tonya Gates", "tgates@students.kennesaw.edu"],
+    [4, "Tonia Gates", "tgates@students.kennesaw.edu"],
     [5, "Ethan Gregg", "egregg@students.kennesaw.edu"],
   ];
 
