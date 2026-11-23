@@ -134,7 +134,7 @@ router.post("/log", (req, res) => {
             numericHours,
             notes
           );
-          createdEntries.push(info.lastInsertRowid);
+          createdEntries.push(Number(info.lastInsertRowid));
         }
       }
 

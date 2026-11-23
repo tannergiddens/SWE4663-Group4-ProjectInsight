@@ -407,6 +407,74 @@ router.put("/:id", (req, res) => {
   }
 });
 
+// Delete project and all associated records
+router.delete("/:id", (req, res) => {
+  const projectId = Number(req.params.id);
+  if (!Number.isSafeInteger(projectId) || projectId <= 0) {
+    return res.status(400).json({ error: "Invalid project ID" });
+  }
+
+  try {
+    const project = db.prepare("SELECT * FROM projects WHERE project_id = ?").get(projectId);
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    const deleteTx = db.transaction(() => {
+      // 1. Task assignments
+      db.prepare(`
+        DELETE FROM task_assignments 
+        WHERE task_id IN (SELECT task_id FROM tasks WHERE project_id = ?)
+      `).run(projectId);
+
+      // 2. Time entries
+      db.prepare(`
+        DELETE FROM time_entries 
+        WHERE project_id = ? OR requirement_id IN (SELECT requirement_id FROM requirements WHERE project_id = ?)
+      `).run(projectId, projectId);
+
+      // 3. Defects
+      db.prepare(`DELETE FROM defects WHERE project_id = ?`).run(projectId);
+
+      // 4. Client acceptance
+      db.prepare(`DELETE FROM client_acceptance WHERE project_id = ?`).run(projectId);
+
+      // 5. Requirement baselines
+      db.prepare(`
+        DELETE FROM requirement_baselines 
+        WHERE requirement_id IN (SELECT requirement_id FROM requirements WHERE project_id = ?)
+      `).run(projectId);
+
+      // 6. Risks
+      db.prepare(`DELETE FROM risks WHERE project_id = ?`).run(projectId);
+
+      // 7. Tasks
+      db.prepare(`DELETE FROM tasks WHERE project_id = ?`).run(projectId);
+
+      // 8. Requirements
+      db.prepare(`DELETE FROM requirements WHERE project_id = ?`).run(projectId);
+
+      // 9. Sprints
+      db.prepare(`DELETE FROM sprints WHERE project_id = ?`).run(projectId);
+
+      // 10. Project phases
+      db.prepare(`DELETE FROM project_phases WHERE project_id = ?`).run(projectId);
+
+      // 11. Project members
+      db.prepare(`DELETE FROM project_members WHERE project_id = ?`).run(projectId);
+
+      // 12. Finally, delete project
+      db.prepare(`DELETE FROM projects WHERE project_id = ?`).run(projectId);
+    });
+
+    deleteTx();
+
+    res.json({ message: "Project deleted successfully", project_id: projectId });
+  } catch (error) {
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
 // Get dynamic project team members (Section A.3)
 router.get("/:id/members", (req, res) => {
   try {

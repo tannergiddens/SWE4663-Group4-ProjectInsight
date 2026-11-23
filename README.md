@@ -4,7 +4,7 @@
 **Group:** Group #4  
 **Instructor:** Prof. Mona Chavoshi  
 **Final Deliverable (Deliverable #3):** Due November 22, 2026  
-**Team Members:** Tanner Giddens, Randy Giles, Hermela Gizaw, Tonya Gates, Ethan Gregg  
+**Team Members:** Tanner Giddens, Randy Giles, Hermela Gizaw, Tonia Gates, Ethan Gregg  
 
 ---
 
@@ -29,11 +29,11 @@ The system addresses the operational need to track and monitor development resou
 
 | Member | Primary Role | Specification Section Owned | Core Deliverables |
 | :--- | :--- | :--- | :--- |
-| **Tanner Giddens** | Full-Stack Lead / Project Manager | **Section B & Section C.1** | Requirements management engine, daily/weekly effort logging API, end-to-end integration |
-| **Randy Giles** | Database & Backend Architect | **Data Architecture & API Scaffold** | SQLite schema (`better-sqlite3`), WAL configuration, aggregation SQL views, Express foundation | Added and integrated a client repository as for standard client data retrieval | Create & Integrate the Client detail Retrieval in the Header | Improve handleCreateProject to persist details if the submission fails, while clearing fields on successful submission | Creation of new Client ID's with the creation of each new project | Creation of 6 test cases | Design and implemented the edition of tasks and sub-tasks | Convert Requirement ID's to hyperlinks | Added modal controls for task hours and record deletions | Added nine (9) functional test cases |
+| **Tanner Giddens** | Full-Stack Lead / Project Manager | **Section B & Section C.1** | Requirements management engine, daily/weekly effort logging API, end-to-end integration, walk-through video presentation |
+| **Randy Giles** | Database & Backend Architect | **Data Architecture & Extended Features** | SQLite schema (`better-sqlite3`), WAL configuration, aggregation SQL views, Express foundation, client repository & header modal, task/sub-task management & validation modals, 9 functional test cases |
 | **Hermela Gizaw** | Risk Management Lead | **Section A.4** | Risk register, risk probability/impact scoring (1–5), status tracking, mitigation plans |
-| **Tonya Gates** | Project Metadata & Roster Lead | **Section A.1, A.2, A.3** | Project overview, PM assignment, dynamic team roster management (add/remove active members) |
-| **Ethan Gregg** | Visualization & Dashboard Lead | **Section C.2** | Cumulative phase matrix view, summary metrics cards, effort percentage breakdowns |
+| **Tonia Gates** | Project Metadata & Roster Lead | **Section A.1, A.2, A.3** | Project overview, PM assignment, dynamic team roster management (add/remove active members) |
+| **Ethan Gregg** | Visualization & Dashboard Lead | **Section C.2** | Cumulative phase matrix view, summary metrics cards, effort percentage breakdowns, UI styling & CSV export |
 
 ---
 
@@ -50,22 +50,26 @@ The system addresses the operational need to track and monitor development resou
 - Node.js (v20+ recommended, tested on v24)
 - npm (v10+)
 
-### Quick Start (Two Terminals)
+### Option 1: 1-Click Launch (Recommended for Evaluation)
+Simply **double-click `run.bat`** in the project folder (or run `npm start` in your terminal):
+```bash
+npm start
+```
+*This starts the unified Express service on `http://localhost:3001`, serves both the frontend and backend together, and automatically opens your browser.*
+
+### Option 2: Development Mode (Two Terminals with Hot-Reload)
 
 #### Terminal 1: Backend API Service
 ```bash
-# Navigate to the backend folder and start the API
-cd api-services
-npm run dev
+npm run api
 ```
-*The API service runs on `http://localhost:3001` with auto-reload and automatically initializes and seeds the SQLite database (`data/managepro.db`).*
+*Runs on `http://localhost:3001` with auto-reload and SQLite database initialization.*
 
 #### Terminal 2: React Frontend Client
 ```bash
-# In the root repository directory
 npm run dev
 ```
-*The React UI runs on `http://localhost:5173` and proxies all `/api` requests to `http://localhost:3001`.*
+*Runs on `http://localhost:5173` with Vite HMR.*
 
 ---
 

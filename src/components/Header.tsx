@@ -8,6 +8,7 @@ interface HeaderProps {
   currentProject: Project | null;
   onSelectProject: (id: number) => void;
   onOpenNewProjectModal: () => void;
+  onDeleteProject?: (id: number) => Promise<void>;
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
@@ -17,6 +18,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentProject,
   onSelectProject,
   onOpenNewProjectModal,
+  onDeleteProject,
   activeTab,
   setActiveTab,
 }) => {
@@ -39,7 +41,34 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <div className="sidebar-project">
-          <label className="sidebar-label">Active Project</label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <label className="sidebar-label" style={{ marginBottom: 0 }}>Active Project</label>
+            {currentProject && onDeleteProject && (
+              <button
+                type="button"
+                onClick={() => {
+                  const confirmed = window.confirm(
+                    `Are you sure you want to delete "${currentProject.project_name}"?\n\nThis will permanently delete this project and all its records.`
+                  );
+                  if (confirmed) {
+                    void onDeleteProject(currentProject.project_id);
+                  }
+                }}
+                title="Delete current project"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'rgba(239, 68, 68, 0.9)',
+                  cursor: 'pointer',
+                  fontSize: '0.75rem',
+                  padding: '0 4px',
+                  fontWeight: 600,
+                }}
+              >
+                Delete
+              </button>
+            )}
+          </div>
           <select
             className="sidebar-project-dropdown"
             value={currentProject?.project_id || ''}

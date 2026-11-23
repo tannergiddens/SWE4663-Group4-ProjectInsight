@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "node api-services/dist/server.js",
+    "start:build": "npm run build && npm --prefix api-services run build && node api-services/dist/server.js",
     "dev": "vite",
     "api": "npm --prefix api-services run dev",
     "seed": "npm --prefix api-services run seed",
